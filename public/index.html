@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Athena IA - Inteligência Artificial para seu Negócio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .glow { box-shadow: 0 0 40px rgba(99, 102, 241, 0.3); }
+  </style>
+</head>
+<body class="bg-gray-950 text-white">
+  <nav class="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
+    <span class="text-2xl font-bold tracking-tight">Athena<span class="text-indigo-400">IA</span></span>
+    <div class="flex gap-6 items-center">
+      <a href="#precos" class="text-gray-300 hover:text-white transition">Preços</a>
+      <a href="/dashboard.html" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-full text-sm font-semibold transition">Dashboard</a>
+    </div>
+  </nav>
+
+  <header class="text-center mt-20 px-4">
+    <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
+      Sua nova<br />
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Inteligência Artificial</span>
+    </h1>
+    <p class="text-gray-400 text-lg md:text-xl mt-6 max-w-2xl mx-auto">
+      Automatize tarefas, gere conteúdo e tome decisões mais inteligentes com a plataforma de IA mais avançada do mercado.
+    </p>
+    <a href="#precos" class="inline-block mt-8 bg-indigo-600 hover:bg-indigo-500 px-8 py-4 rounded-full font-bold text-lg transition glow">Começar Agora</a>
+  </header>
+
+  <section id="precos" class="max-w-6xl mx-auto px-4 mt-32 mb-20">
+    <h2 class="text-4xl font-bold text-center mb-4">Planos</h2>
+    <p class="text-gray-400 text-center mb-12 text-lg">Escolha o plano ideal para você</p>
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col">
+        <h3 class="text-2xl font-bold">Free</h3>
+        <p class="text-gray-400 mt-2">Para testar a plataforma</p>
+        <p class="text-4xl font-bold mt-6">R$ 0</p>
+        <ul class="mt-8 space-y-3 text-gray-300 flex-1">
+          <li>10 comandos/dia</li>
+          <li>Modelo básico</li>
+          <li>Suporte por e-mail</li>
+        </ul>
+        <a href="/dashboard.html" class="block text-center mt-8 border border-indigo-600 text-indigo-400 hover:bg-indigo-600 hover:text-white py-3 rounded-full font-semibold transition">Começar Grátis</a>
+      </div>
+
+      <div class="bg-gray-900 border-2 border-indigo-500 rounded-2xl p-8 flex flex-col relative glow">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-xs font-bold px-4 py-1 rounded-full">MAIS POPULAR</span>
+        <h3 class="text-2xl font-bold">Pro</h3>
+        <p class="text-gray-400 mt-2">Para profissionais</p>
+        <p class="text-4xl font-bold mt-6">R$ 29,90<span class="text-lg text-gray-400 font-normal">/mês</span></p>
+        <ul class="mt-8 space-y-3 text-gray-300 flex-1">
+          <li>Comandos ilimitados</li>
+          <li>Modelo avançado</li>
+          <li>Suporte prioritário</li>
+          <li>Histórico completo</li>
+        </ul>
+        <button onclick="checkout('Plano Athena IA Pro', 1, 29.90)" class="block w-full text-center mt-8 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-full font-bold transition cursor-pointer">Assinar Pro</button>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col">
+        <h3 class="text-2xl font-bold">Enterprise</h3>
+        <p class="text-gray-400 mt-2">Para empresas</p>
+        <p class="text-4xl font-bold mt-6">R$ 99,90<span class="text-lg text-gray-400 font-normal">/mês</span></p>
+        <ul class="mt-8 space-y-3 text-gray-300 flex-1">
+          <li>Tudo do Pro</li>
+          <li>Modelo premium</li>
+          <li>Suporte 24h</li>
+          <li>API dedicada</li>
+          <li>Treinamento personalizado</li>
+        </ul>
+        <button onclick="checkout('Plano Athena IA Enterprise', 1, 99.90)" class="block w-full text-center mt-8 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-full font-bold transition cursor-pointer">Falar com Vendas</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-gray-500 py-8 border-t border-gray-800">
+    &copy; 2026 Athena IA. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    async function checkout(title, quantity, unitPrice) {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = "Redirecionando...";
+      try {
+        const res = await fetch("/create-preference", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, quantity, unit_price: unitPrice }),
+        });
+        const data = await res.json();
+        if (data.init_point) window.location.href = data.init_point;
+        else alert("Erro ao gerar pagamento. Tente novamente.");
+      } catch {
+        alert("Erro de conexão com o servidor.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Assinar Pro";
+      }
+    }
+  </script>
+</body>
+</html>

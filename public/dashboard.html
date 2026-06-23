@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Athena IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    #messages::-webkit-scrollbar { width: 6px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
+    .typing-dot { animation: blink 1.4s infinite both; }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
+  </style>
+</head>
+<body class="bg-gray-950 text-white h-screen flex overflow-hidden">
+  <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col hidden md:flex">
+    <div class="p-6 border-b border-gray-800">
+      <span class="text-xl font-bold">Athena<span class="text-indigo-400">IA</span></span>
+      <p class="text-xs text-gray-500 mt-1">Console de Comandos</p>
+    </div>
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="history">
+      <p class="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">Histórico</p>
+      <div class="text-gray-400 text-sm text-center py-8" id="empty-history">Nenhum comando ainda</div>
+    </nav>
+    <div class="p-4 border-t border-gray-800">
+      <a href="/index.html" class="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition">Voltar ao site</a>
+    </div>
+  </aside>
+
+  <main class="flex-1 flex flex-col">
+    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900/50">
+      <h1 class="font-semibold">Console Athena IA</h1>
+      <div class="flex items-center gap-3">
+        <span class="flex items-center gap-2 text-sm text-gray-400"><span class="w-2 h-2 bg-green-500 rounded-full"></span>Online</span>
+        <span id="plan-badge" class="bg-gray-800 text-xs px-3 py-1 rounded-full">Free</span>
+      </div>
+    </header>
+
+    <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+      <div class="flex justify-start">
+        <div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-3 max-w-[80%]">
+          <p class="text-sm text-gray-300">Olá! Eu sou a <strong class="text-indigo-400">Athena</strong>. Digite um comando abaixo para começar.</p>
+        </div>
+      </div>
+      <div class="flex justify-start">
+        <div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-3 max-w-[80%]">
+          <p class="text-sm text-gray-300">Ex: <code class="bg-gray-700 px-2 py-0.5 rounded text-indigo-300">crie um poema sobre IA</code></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 border-t border-gray-800 bg-gray-900/50">
+      <form id="chat-form" class="flex gap-3 max-w-4xl mx-auto">
+        <input id="prompt-input" type="text" placeholder="Digite seu comando para a Athena..." class="flex-1 bg-gray-800 rounded-full px-6 py-3 outline-none border border-gray-700 focus:border-indigo-500 transition text-sm" autofocus />
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-full font-semibold text-sm transition">Enviar</button>
+      </form>
+      <p class="text-xs text-gray-600 text-center mt-2">
+        <span id="usage-count">0</span>/<span id="usage-limit">10</span> comandos usados hoje
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const API_KEY = "sk-exemplo";
+
+    const messagesEl = document.getElementById("messages");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("prompt-input");
+    const historyEl = document.getElementById("history");
+    const emptyHistory = document.getElementById("empty-history");
+    const usageCount = document.getElementById("usage-count");
+    const usageLimit = document.getElementById("usage-limit");
+
+    let usage = Number(localStorage.getItem("athena_usage") || 0);
+    let history = JSON.parse(localStorage.getItem("athena_history") || "[]");
+
+    usageCount.textContent = usage;
+    usageLimit.textContent = 10;
+    renderHistory();
+
+    function appendMessage(text, isUser = false) {
+      const div = document.createElement("div");
+      div.className = `flex ${isUser ? "justify-end" : "justify-start"}`;
+      div.innerHTML = `<div class="${isUser ? "bg-indigo-600 rounded-2xl rounded-br-sm" : "bg-gray-800 rounded-2xl rounded-bl-sm"} px-5 py-3 max-w-[80%]"><p class="text-sm">${text}</p></div>`;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function showTyping() {
+      const div = document.createElement("div");
+      div.className = "flex justify-start";
+      div.id = "typing";
+      div.innerHTML = `<div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-4 flex gap-1"><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span></div>`;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+      const t = document.getElementById("typing");
+      if (t) t.remove();
+    }
+
+    async function callAI(prompt) {
+      if (API_KEY === "sk-exemplo") {
+        await new Promise(r => setTimeout(r, 1000));
+        const responses = [
+          "Ótimo! Processei sua solicitação. Como assistente IA, posso ajudar com resumos, criação de conteúdo, análise de dados e muito mais.",
+          "Perfeito! A Athena IA utilizou modelos de última geração para entregar este resultado.",
+          "Comando recebido! Analisei os dados e preparei uma resposta completa para você.",
+          "Feito! Aqui está o resultado. Você pode refinar com novos comandos."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+        body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: prompt }] }),
+      });
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || "Erro ao obter resposta.";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      if (usage >= 10) {
+        appendMessage(`Limite diário atingido. <a href="/index.html#precos" class="text-indigo-400 underline">Assine o plano Pro</a> para comandos ilimitados.`);
+        return;
+      }
+
+      appendMessage(prompt, true);
+      input.value = "";
+      showTyping();
+
+      try {
+        const response = await callAI(prompt);
+        removeTyping();
+        appendMessage(response);
+
+        usage++;
+        usageCount.textContent = usage;
+        localStorage.setItem("athena_usage", usage);
+
+        history.unshift({ prompt, response, time: new Date().toLocaleString() });
+        localStorage.setItem("athena_history", JSON.stringify(history));
+        renderHistory();
+      } catch {
+        removeTyping();
+        appendMessage("Erro ao processar comando. Tente novamente.");
+      }
+    });
+
+    function renderHistory() {
+      document.querySelectorAll(".history-item").forEach(el => el.remove());
+      if (history.length === 0) { emptyHistory.style.display = "block"; return; }
+      emptyHistory.style.display = "none";
+      history.slice(0, 20).forEach((item) => {
+        const a = document.createElement("a");
+        a.className = "history-item block px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition cursor-pointer truncate";
+        a.textContent = item.prompt;
+        a.title = item.prompt;
+        a.onclick = () => { input.value = item.prompt; input.focus(); };
+        historyEl.appendChild(a);
+      });
+    }
+  </script>
+</body>
+</html>
