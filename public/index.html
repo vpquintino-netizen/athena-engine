@@ -3,75 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athena IA - Login Corporativo</title>
+    <title>Athena IA - O Ecossistema Definitivo de Inteligência Artificial</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0f172a; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; color: #f8fafc; }
-        .login-card { background: #1e293b; padding: 40px; border-radius: 12px; border: 1px solid #334155; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
-        h2 { margin-top: 0; color: #38bdf8; font-size: 28px; }
-        p { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; color: #cbd5e1; }
-        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 14px; }
-        input:focus { border-color: #38bdf8; outline: none; }
-        .btn { background: #0284c7; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; margin-top: 10px; transition: background 0.2s; }
-        .btn:hover { background: #0369a1; }
-        .alert { background: #1e1b4b; border: 1px solid #4338ca; padding: 10px; border-radius: 6px; font-size: 13px; color: #fbbf24; margin-bottom: 20px; display: none; }
+        :root { --bg-main: #0f172a; --bg-card: #1e293b; --accent-blue: #38bdf8; --accent-purple: #a855f7; --text-light: #f8fafc; --text-muted: #94a3b8; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-main); margin: 0; padding: 0; color: var(--text-light); line-height: 1.5; }
+        
+        /* NAVBAR */
+        nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #1e293b; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 100; }
+        .logo { font-size: 22px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--accent-purple); }
+        .nav-links { display: flex; gap: 25px; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 15px; transition: color 0.2s; }
+        .nav-links a:hover { color: #fff; }
+        .btn-nav { background: var(--accent-purple); color: #fff !important; padding: 8px 18px; border-radius: 20px; font-weight: 600; }
+        .btn-nav:hover { background: #9333ea; }
+
+        /* HERO SECTION */
+        .hero { text-align: center; padding: 160px 20px 80px 20px; max-width: 900px; margin: 0 auto; }
+        .status-badge { inline-block; background: #1e1b4b; border: 1px solid #4338ca; color: #34d399; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 25px; display: inline-flex; align-items: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; display: inline-block; }
+        h1 { font-size: 54px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.025em; line-height: 1.1; }
+        h1 span { background: linear-gradient(to right, var(--accent-blue), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-muted); font-size: 19px; max-width: 700px; margin: 0 auto 35px auto; }
+        .hero-btns { display: flex; justify-content: center; gap: 15px; }
+        .btn-main { background: var(--accent-purple); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: background 0.2s; }
+        .btn-main:hover { background: #9333ea; }
+        .btn-secondary { background: var(--bg-card); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: bold; text-decoration: none; border: 1px solid #334155; transition: border-color 0.2s; }
+        .btn-secondary:hover { border-color: var(--accent-blue); }
+
+        /* TRIAL BOX (FREEMIUM) */
+        .trial-box { background: var(--bg-card); border: 1px solid #334155; border-radius: 12px; padding: 30px; max-width: 600px; margin: 50px auto 0 auto; text-align: left; position: relative; }
+        .trial-box h3 { margin: 0 0 8px 0; font-size: 16px; color: var(--text-light); text-align: center; }
+        .trial-box p { margin: 0 0 15px 0; font-size: 13px; color: var(--text-muted); text-align: center; }
+        .input-group { display: flex; gap: 10px; }
+        .trial-input { flex: 1; background: var(--bg-main); border: 1px solid #475569; border-radius: 6px; padding: 12px; color: #fff; font-size: 14px; }
+        .trial-btn { background: var(--accent-blue); color: #0f172a; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        /* LOCK OVERLAY */
+        .lock-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); border-radius: 12px; align-items: center; justify-content: center; flex-direction: column; text-align: center; z-index: 10; }
+        .lock-title { color: #fbbf24; font-weight: bold; font-size: 18px; margin-bottom: 8px; }
+        .lock-desc { color: var(--text-light); font-size: 14px; margin-bottom: 15px; padding: 0 20px; }
+
+        /* FOOTER & COOKIES */
+        footer { border-top: 1px solid #1e293b; padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px; margin-top: 100px; }
+        .footer-links { margin-top: 15px; display: flex; justify-content: center; gap: 20px; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; }
+        .footer-links a:hover { color: #fff; }
+        .cookie-banner { position: fixed; bottom: 20px; left: 20px; background: var(--bg-card); border: 1px solid #334155; padding: 15px 20px; border-radius: 8px; max-width: 400px; z-index: 200; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 10px; }
+        .cookie-btn { background: #16a34a; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2>Athena IA</h2>
-        <p>Acesse o Hub de Controle dos seus Agentes</p>
-        <div class="alert" id="paymentAlert">🎉 Pagamento Confirmado! Faça login abaixo para acessar sua conta Premium.</div>
-        <div class="alert" style="background:#7f1d1d; border-color:#b91c1c; color:#fca5a5;" id="errorAlert"></div>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">E-mail Corporativo</label>
-                <input type="email" id="email" required placeholder="seu@email.com">
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">🧬 Athena<span>IA</span></div>
+        <ul class="nav-links">
+            <li><a href="#recursos">Recursos</a></li>
+            <li><a href="#planos">Planos</a></li>
+            <li><a href="mailto:athenaia1@hotmail.com">Fale Conosco</a></li>
+            <li><a href="/login.html" class="btn-nav">Acesso ao Painel</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="status-badge"><span class="status-dot"></span> Sistema Operacional 24/7 — Online</div>
+        <h1>O Ecossistema Definitivo<br>de <span>IA para Empresas</span></h1>
+        <p>O Athena IA unifica automação de marketing, inteligência jurídica, logística, OCR, CRM, analytics preditivos e muito mais em um único painel corporativo autônomo.</p>
+        
+        <div class="hero-btns">
+            <a href="/login.html" class="btn-main">Comece Agora — R$ 350/mês</a>
+            <a href="#recursos" class="btn-secondary">Explorar Recursos</a>
+        </div>
+
+        <!-- TRIAL BOX (FREEMIUM TRAVADO) -->
+        <div class="trial-box">
+            <h3>Experimente a Athena IA Grátis</h3>
+            <p>Digite um comando de teste e veja o poder da IA em ação</p>
+            <div class="input-group">
+                <input type="text" class="trial-input" id="trialInput" placeholder="Ex: analisar mercado de saúde para 2026">
+                <button class="trial-btn" onclick="executeTrial()">Gerar com IA</button>
             </div>
-            <div class="form-group">
-                <label for="password">Senha de Acesso</label>
-                <input type="password" id="password" required placeholder="••••••••">
+            
+            <!-- OVERLAY DE BLOQUEIO -->
+            <div class="lock-overlay" id="lockOverlay">
+                <div class="lock-title">🔒 Limite de Teste Atingido</div>
+                <div class="lock-desc">Seu IP concluiu a avaliação gratuita de 1 comando. Libere acesso irrestrito às 8 abas de agentes agora mesmo.</div>
+                <a href="/login.html" class="btn-main" style="padding: 10px 20px; font-size:14px;">Liberar Acesso Premium</a>
             </div>
-            <button type="submit" class="btn">Entrar no Painel</button>
-        </form>
+        </div>
     </div>
+
+    <!-- COOKIE BANNER -->
+    <div class="cookie-banner" id="cookieBanner">
+        <span style="font-size: 13px; color: var(--text-muted);">Utilizamos cookies essenciais e tecnologias semelhantes para personalizar a sua experiência em conformidade com a LGPD.</span>
+        <button class="cookie-btn" onclick="acceptCookies()">Aceitar e Prosseguir</button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 Athena IA. Todos os direitos reservados. Nota Comercial: Conforme o Art. 49 do CDC, garantimos reembolso integral em até 7 dias após a contratação de qualquer plano.</p>
+        <div class="footer-links">
+            <a href="#">Termos de Uso</a>
+            <a href="#">Política de Privacidade (LGPD)</a>
+            <a href="mailto:athenaia1@hotmail.com">Suporte Comercial</a>
+        </div>
+    </footer>
+
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('status') === 'approved' || urlParams.get('payment_success') === 'true') {
-            document.getElementById('paymentAlert').style.display = 'block';
+        function executeTrial() {
+            const input = document.getElementById('trialInput').value;
+            if (!input) return alert('Digite uma intenção para o robô processar.');
+            
+            alert('🤖 Athena IA processando sua requisição pública...');
+            setTimeout(() => {
+                document.getElementById('lockOverlay').style.display = 'flex';
+            }, 1000);
         }
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errBox = document.getElementById('errorAlert');
-            errBox.style.display = 'none';
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok && data.success) {
-                    localStorage.setItem('athena_token', data.token);
-                    localStorage.setItem('user_company_id', data.userId);
-                    localStorage.setItem('user_plan', data.plan);
-                    if (data.isMaster) {
-                        window.location.href = '/admin.html';
-                    } else {
-                        window.location.href = '/dashboard-agentes.html';
-                    }
-                } else {
-                    errBox.innerText = data.error || 'Credenciais inválidas para esta empresa.';
-                    errBox.style.display = 'block';
-                }
-            } catch (err) {
-                errBox.innerText = 'Erro na conexão com os servidores.';
-                errBox.style.display = 'block';
-            }
-        });
+
+        function acceptCookies() {
+            document.getElementById('cookieBanner').style.display = 'none';
+            localStorage.setItem('athena_cookies_accepted', 'true');
+        }
+
+        if (localStorage.getItem('athena_cookies_accepted') === 'true') {
+            document.getElementById('cookieBanner').style.display = 'none';
+        }
     </script>
 </body>
 </html>
