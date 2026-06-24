@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "setup": "node migrate.js && node server.js",
+    "up": "node migrate.js && node --watch server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -16,10 +16,10 @@ function findMaster(email) { return MASTERS.find(m => m.email === email.toLowerC
 function initPool() {
   if (!process.env.DATABASE_URL) {
     console.log("DATABASE_URL not set — using in-memory fallback");
-  fallbackMode = true;
-  MASTERS.forEach(m => { if (!fallbackUsers.has(m.email)) fallbackUsers.set(m.email, { ...m }); });
-  return;
-}
+    fallbackMode = true;
+    MASTERS.forEach(m => { if (!fallbackUsers.has(m.email)) fallbackUsers.set(m.email, { ...m }); });
+    return;
+  }
 
   try {
     pool = new Pool({
