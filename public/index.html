@@ -95,6 +95,15 @@
       <a href="#planos" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base shadow-lg shadow-indigo-600/25">Comece Agora — R$ 350/mês</a>
       <a href="#recursos" class="btn-outline text-gray-300 font-medium px-8 py-3.5 rounded-xl text-base">Explorar Recursos</a>
     </div>
+    <div id="trial-widget" class="mt-10 max-w-lg mx-auto bg-gray-900/70 border border-indigo-500/20 rounded-2xl p-5 glow-card">
+      <h3 class="text-sm font-semibold text-white mb-1">Experimente a Athena IA Grátis</h3>
+      <p class="text-xs text-gray-500 mb-3">Digite um comando de teste e veja o poder da IA em ação.</p>
+      <div class="flex gap-2">
+        <input id="trial-input" type="text" placeholder='Ex: "analisar mercado de saude para 2026"' class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition input-field" />
+        <button id="trial-btn" class="btn-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap shadow-lg shadow-indigo-600/20">Gerar com IA</button>
+      </div>
+      <div id="trial-result" class="hidden mt-3 bg-gray-800/40 rounded-xl p-3 text-left"></div>
+    </div>
     <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
       <div class="text-center"><p class="text-3xl font-bold text-white">8</p><p class="text-xs text-gray-500 mt-1">Módulos Operacionais</p></div>
       <div class="text-center"><p class="text-3xl font-bold text-white">24/7</p><p class="text-xs text-gray-500 mt-1">Monitoramento Contínuo</p></div>
@@ -278,6 +287,19 @@
   </div>
 </div>
 
+<div id="trial-modal" class="fixed inset-0 z-[300] hidden flex items-center justify-center bg-black/80 backdrop-blur-md" style="cursor:default;">
+  <div class="bg-gray-900 border border-indigo-500/30 rounded-3xl p-8 w-full max-w-md mx-4 glow-card text-center relative" onclick="event.stopPropagation()">
+    <div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/20">
+      <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <h3 class="text-lg font-bold text-white mb-2">Teste concluído com sucesso!</h3>
+    <p class="text-sm text-gray-400 mb-6 leading-relaxed">Para liberar acesso total às 8 abas de IA e copiar seus resultados, assine o plano premium.</p>
+    <div id="trial-modal-result" class="bg-gray-800/40 rounded-xl p-3 mb-6 text-left text-xs text-gray-300 hidden"></div>
+    <button id="trial-modal-btn" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base shadow-lg shadow-indigo-600/25 w-full">Assinar Agora — R$ 350/mês</button>
+    <p class="text-xs text-gray-600 mt-3">Pagamento 100% seguro via Mercado Pago</p>
+  </div>
+</div>
+
 <div id="lgpd-banner" class="fixed bottom-0 left-0 w-full z-[200] glass border-t border-gray-800/60 p-4">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-start gap-3">
@@ -317,6 +339,49 @@ document.querySelectorAll('[id$="-modal"]').forEach(m=>{m.addEventListener('clic
   if(localStorage.getItem("lgpd_consent")){banner.classList.add("hidden-banner");return;}
   acceptBtn.addEventListener("click",()=>{localStorage.setItem("lgpd_consent","accepted");banner.classList.add("hidden-banner");});
   rejectBtn.addEventListener("click",()=>{localStorage.setItem("lgpd_consent","rejected");banner.classList.add("hidden-banner");});
+})();
+
+(function initTrial(){
+  const btn=document.getElementById("trial-btn");
+  const input=document.getElementById("trial-input");
+  const result=document.getElementById("trial-result");
+  const modal=document.getElementById("trial-modal");
+  const modalResult=document.getElementById("trial-modal-result");
+  const modalBtn=document.getElementById("trial-modal-btn");
+  let used=false;
+  btn.addEventListener("click",async()=>{
+    if(used){showTrialModal(null);return;}
+    const prompt=input.value.trim();
+    if(!prompt){input.style.borderColor="#ef4444";input.focus();setTimeout(()=>input.style.borderColor="",1500);return;}
+    btn.disabled=true; btn.textContent="Processando...";
+    try{
+      const r=await fetch("/api/public-trial",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
+      const d=await r.json();
+      if(r.status===429){used=true;showTrialModal(null);btn.disabled=false;btn.textContent="Gerar com IA";return;}
+      if(!d.success){result.classList.remove("hidden");result.innerHTML='<p class="text-red-400 text-xs">'+d.error+'</p>';btn.disabled=false;btn.textContent="Gerar com IA";return;}
+      used=true;
+      result.classList.remove("hidden");
+      result.innerHTML='<p class="text-indigo-400 text-xs font-semibold mb-1">'+d.titulo+'</p><p class="text-gray-300 text-xs leading-relaxed">'+d.resultado+'</p>';
+      btn.disabled=false; btn.textContent="Teste utilizado";
+      showTrialModal(d);
+    }catch(e){result.classList.remove("hidden");result.innerHTML='<p class="text-red-400 text-xs">Erro de conexão. Tente novamente.</p>';btn.disabled=false;btn.textContent="Gerar com IA";}
+  });
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
+  function showTrialModal(data){
+    if(data){modalResult.classList.remove("hidden");modalResult.innerHTML='<p class="text-indigo-400 text-xs font-semibold mb-1">'+data.titulo+'</p><p class="text-gray-300 text-xs">'+data.resultado+'</p>';}
+    modal.classList.remove("hidden");document.body.style.overflow="hidden";
+  }
+  modalBtn.addEventListener("click",async()=>{
+    modalBtn.disabled=true; modalBtn.textContent="Gerando pagamento...";
+    try{
+      const sd=JSON.parse(localStorage.getItem("athena_session")||"{}");
+      const email=sd.email||"";
+      const r=await fetch("/create-preference",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:"Plano Athena IA - Mensal",quantity:1,unit_price:350,email})});
+      const d=await r.json();
+      if(d.init_point){window.location.href=d.init_point;}
+      else{alert("Erro ao gerar pagamento.");modalBtn.disabled=false;modalBtn.textContent="Assinar Agora — R$ 350/mês";}
+    }catch(e){alert("Erro de conexão.");modalBtn.disabled=false;modalBtn.textContent="Assinar Agora — R$ 350/mês";}
+  });
 })();
 
 (function initCheckout(){

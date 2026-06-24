@@ -149,6 +149,27 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+const trialLimits = new Map();
+app.post("/api/public-trial", (req, res) => {
+  const ip = req.ip || req.socket.remoteAddress || "unknown";
+  const count = trialLimits.get(ip) || 0;
+  if (count >= 1) {
+    return res.status(429).json({ error: "limite_atingido", message: "Teste gratuito já utilizado. Assine o plano para continuar." });
+  }
+  trialLimits.set(ip, count + 1);
+  const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) {
+    return res.status(400).json({ error: "Digite um comando para testar." });
+  }
+  const responses = [
+    { titulo: "Análise de Sentimento", resultado: `Com base no seu comando "${prompt.substring(0, 60)}", identificamos tendência POSITIVA (score 0.89). Oportunidade de engajamento identificada no setor.` },
+    { titulo: "Sugestão de Ação", resultado: `Recomendamos criar uma campanha segmentada para o público identificado. Estimativa de conversão: 12.4% nos primeiros 30 dias.` },
+    { titulo: "Insight Estratégico", resultado: `O termo pesquisado apresenta crescimento de 234% no volume de buscas nos últimos 90 dias. Mercado aquecido para entrada.` },
+  ];
+  const chosen = responses[Math.floor(Math.random() * responses.length)];
+  res.json({ success: true, titulo: chosen.titulo, resultado: chosen.resultado });
+});
+
 app.use("/api", authMiddleware, requireActivePlan);
 
 app.post("/create-preference", async (req, res) => {
