@@ -21,10 +21,10 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-const MASTER_EMAILS = ["master@athenaia.com", "armarinhodajack@gmail.com"];
+const MASTER_EMAILS = ["vpquintino@gmail.com", "armarinhodajack@gmail.com"];
 const MASTER_CREDENTIALS = {
-  "master@athenaia.com": { password: "Master@2026", id: "00000000-0000-0000-0000-000000000000" },
-  "armarinhodajack@gmail.com": { password: "Master@2026", id: "00000000-0000-0000-0000-000000000001" },
+  "vpquintino@gmail.com": { password: "@Blt18023", id: "00000000-0000-0000-0000-000000000000" },
+  "armarinhodajack@gmail.com": { password: "@126373@", id: "00000000-0000-0000-0000-000000000001" },
 };
 function isMasterEmail(email) { return MASTER_EMAILS.includes(email.toLowerCase().trim()); }
 function getMasterCred(email) { return MASTER_CREDENTIALS[email.toLowerCase().trim()]; }

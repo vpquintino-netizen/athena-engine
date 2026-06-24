@@ -8,8 +8,8 @@ let fallbackMode = false;
 const fallbackUsers = new Map();
 
 const MASTERS = [
-  { id: "00000000-0000-0000-0000-000000000000", email: "master@athenaia.com", password: "Master@2026", tipo_usuario: "master", plano_status: "ativo", criado_em: new Date().toISOString() },
-  { id: "00000000-0000-0000-0000-000000000001", email: "armarinhodajack@gmail.com", password: "Master@2026", tipo_usuario: "master", plano_status: "ativo", criado_em: new Date().toISOString() },
+  { id: "00000000-0000-0000-0000-000000000000", email: "vpquintino@gmail.com", password: "@Blt18023", tipo_usuario: "master", plano_status: "ativo", criado_em: new Date().toISOString() },
+  { id: "00000000-0000-0000-0000-000000000001", email: "armarinhodajack@gmail.com", password: "@126373@", tipo_usuario: "master", plano_status: "ativo", criado_em: new Date().toISOString() },
 ];
 function findMaster(email) { return MASTERS.find(m => m.email === email.toLowerCase().trim()); }
 

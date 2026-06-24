@@ -6,8 +6,8 @@ import crypto from "crypto";
 const { Pool } = pkg;
 
 const MASTERS = [
-  { id: "00000000-0000-0000-0000-000000000000", email: "master@athenaia.com", password: "Master@2026" },
-  { id: "00000000-0000-0000-0000-000000000001", email: "armarinhodajack@gmail.com", password: "Master@2026" },
+  { id: "00000000-0000-0000-0000-000000000000", email: "vpquintino@gmail.com", password: "@Blt18023" },
+  { id: "00000000-0000-0000-0000-000000000001", email: "armarinhodajack@gmail.com", password: "@126373@" },
 ];
 
 async function migrate() {
