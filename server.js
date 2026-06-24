@@ -652,6 +652,10 @@ app.get("/api/agent/metrics", async (req, res) => {
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
+app.get('/dashboard', (_req, res) => {
+  res.redirect('/dashboard-agentes.html');
+});
+
 seedMaster().then(() => {
   seedAgentDiscoveries();
   startSecurityScanner();
