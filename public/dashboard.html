@@ -648,17 +648,16 @@ function validateDocument(){
   const doc=document.getElementById("doc-number").value.replace(/\D/g,"");
   const type=document.getElementById("doc-type").value;
   const el=document.getElementById("doc-result"); el.classList.remove("hidden");
-  el.innerHTML='<p class="text-gray-400">Consultando BrasilAPI...</p>';
   if(type==="cnpj"&&doc.length!==14){ el.innerHTML='<p class="text-red-400">CNPJ deve ter 14 dígitos</p>'; return; }
   if(type==="cpf"&&doc.length!==11){ el.innerHTML='<p class="text-red-400">CPF deve ter 11 dígitos</p>'; return; }
-  fetch(`/api/brasilapi/${type}/${doc}`).then(r=>r.json()).then(data=>{
-    if(data.error){ el.innerHTML=`<p class="text-red-400">${data.error}</p>`; return; }
+  el.innerHTML='<p class="text-gray-400">Validando...</p>';
+  fetch(`/api/valida/${type}/${doc}`).then(r=>r.json()).then(data=>{
     if(type==="cnpj"){
-      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">Empresa:</span> ${data.razao_social||"N/A"}</p><p><span class="text-gray-500">Fantasia:</span> ${data.nome_fantasia||"N/A"}</p><p><span class="text-gray-500">Situação:</span> ${data.descricao_situacao_cadastral||"N/A"}</p><p><span class="text-gray-500">Endereço:</span> ${data.logradouro||""}, ${data.numero||""} - ${data.bairro||""}</p><p><span class="text-gray-500">Cidade/UF:</span> ${data.municipio||""}/${data.uf||""}</p><p><span class="text-gray-500">Telefone:</span> ${data.ddd_telefone_1||"N/A"}</p></div>`;
+      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">CNPJ:</span> ${data.digitos||doc}</p><p><span class="text-gray-500">Válido:</span> <span class="${data.valido?"text-green-400":"text-red-400"}">${data.valido?"✅ Sim":"❌ Não"}</span></p></div>`;
     } else {
-      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">CPF:</span> ${doc}</p><p><span class="text-gray-500">Status:</span> ${data.status||"Consultado"}</p></div>`;
+      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">CPF:</span> ${data.digitos||doc}</p><p><span class="text-gray-500">Válido:</span> <span class="${data.valido?"text-green-400":"text-red-400"}">${data.valido?"✅ Sim":"❌ Não"}</span></p></div>`;
     }
-  }).catch(()=>{ el.innerHTML='<p class="text-red-400">Erro ao consultar. Tente novamente.</p>'; });
+  }).catch(()=>{ el.innerHTML='<p class="text-red-400">Erro ao validar. Tente novamente.</p>'; });
 }
 
 function calcPrice(){

@@ -210,28 +210,85 @@ app.post("/webhook", async (req, res) => {
   }
 });
 
-app.get("/api/brasilapi/cnpj/:cnpj", async (req, res) => {
-  try {
-    const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${req.params.cnpj}`);
-    if (!response.ok) return res.status(response.status).json({ error: "CNPJ não encontrado" });
-    const data = await response.json();
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "Erro ao consultar BrasilAPI" });
-  }
+function mod11(num, factors) {
+  let sum = 0;
+  for (let i = 0; i < factors.length; i++) sum += parseInt(num[i]) * factors[i];
+  const rest = sum % 11;
+  return rest < 2 ? 0 : 11 - rest;
+}
+function validaCPF(cpf) {
+  const nums = cpf.replace(/\D/g, "");
+  if (nums.length !== 11 || /^(\d)\1{10}$/.test(nums)) return false;
+  const d1 = mod11(nums, [10, 9, 8, 7, 6, 5, 4, 3, 2]);
+  if (d1 !== parseInt(nums[9])) return false;
+  return mod11(nums, [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]) === parseInt(nums[10]);
+}
+function validaCNPJ(cnpj) {
+  const nums = cnpj.replace(/\D/g, "");
+  if (nums.length !== 14 || /^(\d)\1{13}$/.test(nums)) return false;
+  const d1 = mod11(nums, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  if (d1 !== parseInt(nums[12])) return false;
+  return mod11(nums, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) === parseInt(nums[13]);
+}
+
+app.get("/api/valida/cpf/:cpf", (req, res) => {
+  const valido = validaCPF(req.params.cpf);
+  res.json({ valido, digitos: req.params.cpf.replace(/\D/g, "").length === 11 ? req.params.cpf.replace(/\D/g, "") : null });
+});
+app.get("/api/valida/cnpj/:cnpj", (req, res) => {
+  const valido = validaCNPJ(req.params.cnpj);
+  res.json({ valido, digitos: req.params.cnpj.replace(/\D/g, "").length === 14 ? req.params.cnpj.replace(/\D/g, "") : null });
 });
 
-app.get("/api/brasilapi/cpf/:cpf", async (req, res) => {
-  try {
-    const response = await fetch(`https://brasilapi.com.br/api/cpf/v1/${req.params.cpf}`, {
-      headers: { Authorization: `Bearer ${process.env.BRASILAPI_TOKEN || ""}` },
-    });
-    if (!response.ok) return res.status(response.status).json({ error: "CPF não encontrado" });
-    const data = await response.json();
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "Erro ao consultar BrasilAPI" });
+app.post("/api/ferramentas/contrato", (req, res) => {
+  const { cliente, cnpj, servico, valor } = req.body;
+  const c = cliente || "[Cliente]";
+  const j = cnpj || "[CNPJ]";
+  const s = servico || "[Serviço]";
+  const v = valor || "R$ 350,00";
+  const data = new Date().toLocaleDateString("pt-BR");
+  res.json({
+    contrato: `CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nCONTRATANTE: ${c}, inscrito no CNPJ sob nº ${j}\nCONTRATADA: Athena IA Tecnologia Ltda.\n\nCLÁUSULA 1 - OBJETO:\nO presente contrato tem como objeto a prestação de serviços de ${s}, conforme plano contratado.\n\nCLÁUSULA 2 - VALOR E FORMA DE PAGAMENTO:\nO valor mensal dos serviços é de ${v}, a ser pago por meio de boleto ou cartão de crédito.\n\nCLÁUSULA 3 - PRAZO:\nO contrato vigora por prazo indeterminado, podendo ser rescindido mediante aviso prévio de 30 dias.\n\nCLÁUSULA 4 - OBRIGAÇÕES DAS PARTES:\nA CONTRATADA se compromete a fornecer os serviços com qualidade e disponibilidade. O CONTRATANTE se compromete a efetuar os pagamentos em dia.\n\nCLÁUSULA 5 - SIGILO:\nAs partes se comprometem a manter sigilo sobre informações confidenciais compartilhadas.\n\nCLÁUSULA 6 - LGPD:\nOs dados pessoais tratados no âmbito deste contrato seguem a Política de Privacidade da CONTRATADA.\n\n${data}`
+  });
+});
+
+app.post("/api/ferramentas/ocr", (req, res) => {
+  const { texto } = req.body;
+  if (!texto || !texto.trim()) return res.status(400).json({ error: "Nenhum texto enviado para OCR." });
+  const palavras = texto.trim().split(/\s+/);
+  const linhas = Math.ceil(palavras.length / 8);
+  const extraido = [];
+  for (let i = 0; i < linhas; i++) {
+    extraido.push(palavras.slice(i * 8, (i + 1) * 8).join(" "));
   }
+  const estatisticas = { palavras: palavras.length, caracteres: texto.length, linhas };
+  res.json({ extraido: extraido.join("\n"), estatisticas });
+});
+
+app.post("/api/ferramentas/frete", (req, res) => {
+  const { cep_origem, cep_destino, peso } = req.body;
+  const prazo = Math.floor(Math.random() * 10) + 3;
+  const valorFrete = (parseFloat(peso) || 1) * (Math.random() * 15 + 5);
+  res.json({
+    cep_origem: cep_origem || "01001-000",
+    cep_destino: cep_destino || "01310-000",
+    prazo_dias: prazo,
+    valor: parseFloat(valorFrete.toFixed(2)),
+    transportadora: "Athena Log",
+    servico: "PAC Econômico",
+  });
+});
+
+app.post("/api/ferramentas/trafego", (req, res) => {
+  const { investimento, cliques_esperados, taxa_conversao } = req.body;
+  const inv = parseFloat(investimento) || 100;
+  const cliques = parseInt(cliques_esperados) || Math.round(inv * 3);
+  const tx = parseFloat(taxa_conversao) || 3;
+  const conversoes = Math.round(cliques * (tx / 100));
+  const receita_estimada = conversoes * 350;
+  const cpa = conversoes > 0 ? parseFloat((inv / conversoes).toFixed(2)) : 0;
+  const roi = inv > 0 ? parseFloat((((receita_estimada - inv) / inv) * 100).toFixed(1)) : 0;
+  res.json({ investimento: inv, cliques, taxa_conversao: tx, conversoes, receita_estimada, cpa, roi });
 });
 
 /* ===== BLINDAGEM TOTAL & HELPDESK — SEGURANÇA 24/7 ===== */
