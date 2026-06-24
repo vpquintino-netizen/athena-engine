@@ -55,6 +55,25 @@ export async function query(text, params) {
   return p.query(text, params);
 }
 
+export async function findUserById(id) {
+  const { pool: p, fallbackMode: fb, fallbackUsers: fbUsers } = getPool();
+  if (fb || !p) {
+    for (const u of fbUsers.values()) {
+      if (u.id === id) return u;
+    }
+    return null;
+  }
+  try {
+    const result = await p.query("SELECT * FROM usuarios WHERE id = $1", [id]);
+    return result.rows[0] || null;
+  } catch {
+    for (const u of fbUsers.values()) {
+      if (u.id === id) return u;
+    }
+    return null;
+  }
+}
+
 export async function findUserByEmail(email) {
   const { pool: p, fallbackMode: fb, fallbackUsers: fbUsers, findMaster: fm } = getPool();
   const normalized = email.toLowerCase().trim();

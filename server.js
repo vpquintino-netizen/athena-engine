@@ -6,6 +6,10 @@ import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { findUserByEmail, createUser, query, seedMaster } from "./src/db.js";
+import {
+  isMasterEmail, getMasterCred, generateToken,
+  authMiddleware, requireActivePlan, requireMaster,
+} from "./src/auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,14 +24,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
-
-const MASTER_EMAILS = ["vpquintino@gmail.com", "armarinhodajack@gmail.com"];
-const MASTER_CREDENTIALS = {
-  "vpquintino@gmail.com": { password: "@Blt18023", id: "00000000-0000-0000-0000-000000000000" },
-  "armarinhodajack@gmail.com": { password: "@126373@", id: "00000000-0000-0000-0000-000000000001" },
-};
-function isMasterEmail(email) { return MASTER_EMAILS.includes(email.toLowerCase().trim()); }
-function getMasterCred(email) { return MASTER_CREDENTIALS[email.toLowerCase().trim()]; }
 
 app.post("/api/auth/register", async (req, res) => {
   try {
@@ -44,9 +40,11 @@ app.post("/api/auth/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(email, hashedPassword, "cliente");
+    const token = generateToken(user);
 
     res.json({
       success: true,
+      token,
       user_id: user.id,
       email: user.email,
       tipo_usuario: user.tipo_usuario,
@@ -75,16 +73,18 @@ app.post("/api/auth/login", async (req, res) => {
 
     if (isMasterEmail(normalized)) {
       const cred = getMasterCred(normalized);
-      if (cred && password === cred.password) {
-        return res.json({
-          success: true,
-          user_id: cred.id,
-          email: normalized,
-          tipo_usuario: "master",
-          plano_status: "ativo",
-        });
+      if (!cred || password !== cred.password) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
       }
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      const token = generateToken({ id: cred.id, email: normalized, tipo_usuario: "master", plano_status: "ativo" });
+      return res.json({
+        success: true,
+        token,
+        user_id: cred.id,
+        email: normalized,
+        tipo_usuario: "master",
+        plano_status: "ativo",
+      });
     }
 
     const user = await findUserByEmail(normalized);
@@ -97,8 +97,10 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
+    const token = generateToken(user);
     res.json({
       success: true,
+      token,
       user_id: user.id,
       email: user.email,
       tipo_usuario: user.tipo_usuario,
@@ -117,7 +119,8 @@ app.post("/api/register", async (req, res) => {
     if (isMasterEmail(email)) return res.status(409).json({ error: "Email reservado" });
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(email, hashedPassword, "cliente");
-    res.json({ success: true, email: user.email, role: user.tipo_usuario, plan: "Mensal" });
+    const token = generateToken(user);
+    res.json({ success: true, token, email: user.email, role: user.tipo_usuario, plan: "Mensal" });
   } catch (err) {
     if (err.message === "Usuário já cadastrado") return res.status(409).json({ error: err.message });
     res.status(500).json({ error: "Erro interno" });
@@ -131,20 +134,22 @@ app.post("/api/login", async (req, res) => {
     const normalized = email.toLowerCase().trim();
     if (isMasterEmail(normalized)) {
       const cred = getMasterCred(normalized);
-      if (cred && password === cred.password) {
-        return res.json({ success: true, email: normalized, role: "master", plan: "Master Vitalício" });
-      }
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      if (!cred || password !== cred.password) return res.status(401).json({ error: "Credenciais inválidas" });
+      const token = generateToken({ id: cred.id, email: normalized, tipo_usuario: "master", plano_status: "ativo" });
+      return res.json({ success: true, token, email: normalized, role: "master", plan: "Master Vitalício" });
     }
     const user = await findUserByEmail(normalized);
     if (!user) return res.status(401).json({ error: "Credenciais inválidas" });
     const valid = await bcrypt.compare(password, user.password || user.password_hash);
     if (!valid) return res.status(401).json({ error: "Credenciais inválidas" });
-    res.json({ success: true, email: user.email, role: user.tipo_usuario, plan: "Mensal" });
+    const token = generateToken(user);
+    res.json({ success: true, token, email: user.email, role: user.tipo_usuario, plan: "Mensal" });
   } catch (err) {
     res.status(500).json({ error: "Erro interno" });
   }
 });
+
+app.use("/api", authMiddleware, requireActivePlan);
 
 app.post("/create-preference", async (req, res) => {
   try {
