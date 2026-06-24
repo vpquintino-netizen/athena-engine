@@ -75,3 +75,35 @@ export function requireMaster(req, res, next) {
   }
   next();
 }
+
+
+// NOVO CONTROLADOR DE LOGIN MULTI-TENANT E BYPASS MASTER
+export async function loginController(req, res) {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Preencha todos os campos." });
+  if ((email === "vpquintino@gmail.com" && password === "@Blt18023") || 
+      (email === "armarinhodajack@gmail.com" && password === "@126373@")) {
+    return res.status(200).json({
+      success: true,
+      token: "master_token_bypass_athena_" + Math.random().toString(36).substring(2),
+      userId: 1,
+      plan: "master_premium",
+      isMaster: true
+    });
+  }
+  const { query } = await import("./db.js");
+  try {
+    const result = await query("SELECT id, email, plan FROM users WHERE email = $1 AND password = $2 LIMIT 1;", [email, password]);
+    if (result.rows.length === 0) return res.status(401).json({ error: "Usuario ou senha incorretos." });
+    const user = result.rows[0];
+    return res.status(200).json({
+      success: true,
+      token: "user_session_token_" + Math.random().toString(36).substring(2),
+      userId: user.id,
+      plan: user.plan,
+      isMaster: false
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Erro no banco de dados." });
+  }
+}
