@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Athena IA — Administração</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #0a0a0f; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f5e; border-radius: 10px; }
+    .glass { background: rgba(17,17,27,0.8); backdrop-filter: blur(20px); }
+    .glow-card { box-shadow: 0 0 40px rgba(99,102,241,0.06); }
+    .status-dot { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  </style>
+</head>
+<body class="text-white">
+  <nav class="glass border-b border-gray-800/60 px-5 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <svg class="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="text-base font-bold">Athena<span class="text-indigo-400">IA</span> <span class="text-[10px] text-gray-500 font-normal">Admin</span></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-gray-400" id="admin-email">carregando...</span>
+      <a href="/dashboard.html" class="text-xs text-indigo-400 hover:text-indigo-300 transition">Painel</a>
+      <button id="logout-btn" class="text-xs text-gray-500 hover:text-red-400 transition">Sair</button>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto p-4 md:p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-xl font-bold">Usuários Cadastrados</h1>
+        <p class="text-xs text-gray-500 mt-1">Gerencie planos e visualize todos os usuários da plataforma.</p>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-800/40 rounded-lg px-3 py-2">
+        <span class="w-2 h-2 bg-green-500 rounded-full status-dot"></span>
+        <span id="user-count">0 usuários</span>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden glow-card">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-800/60 bg-gray-800/30">
+              <th class="text-left px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">UUID</th>
+              <th class="text-left px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">E-mail</th>
+              <th class="text-left px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">Tipo</th>
+              <th class="text-left px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">Plano</th>
+              <th class="text-left px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">Cadastro</th>
+              <th class="text-center px-4 py-3 text-[10px] text-gray-500 font-medium uppercase tracking-wider">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr><td colspan="6" class="text-center py-8 text-gray-500 text-xs">Carregando usuários...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-gray-900/40 border border-gray-800/40 rounded-xl p-4">
+      <h3 class="text-xs font-semibold text-gray-300 mb-2">Webhook Mercado Pago</h3>
+      <p class="text-xs text-gray-500 mb-2">Status da última notificação IPN processada:</p>
+      <div id="webhook-status" class="text-xs text-gray-400">Aguardando notificações...</div>
+    </div>
+  </main>
+
+<script>
+function __session() {
+  try { return JSON.parse(localStorage.getItem("athena_session") || "{}"); } catch { return {}; }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const sd = __session();
+  if (!sd.email || !sd.loggedIn || sd.role !== "master") {
+    window.location.href = "/index.html";
+    return;
+  }
+  document.getElementById("admin-email").textContent = sd.email + " ⚡";
+  loadUsers();
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  localStorage.removeItem("athena_session");
+  window.location.href = "/index.html";
+});
+
+async function loadUsers() {
+  const tbody = document.getElementById("users-table-body");
+  try {
+    const r = await fetch("/api/admin/users", {
+      headers: { Authorization: "Bearer " + (__session().token || "") },
+    });
+    if (!r.ok) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-400 text-xs">Erro ao carregar. Token expirado?</td></tr>'; return; }
+    const data = await r.json();
+    const users = data.users || [];
+    document.getElementById("user-count").textContent = users.length + " usuário(s)";
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500 text-xs">Nenhum usuário cadastrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const isMaster = u.tipo_usuario === "master";
+      const isActive = u.plano_status === "ativo";
+      const toggleStatus = isActive ? "inativo" : "ativo";
+      const toggleLabel = isActive ? "Desativar" : "Ativar";
+      return `<tr class="border-b border-gray-800/40 hover:bg-gray-800/20 transition">
+        <td class="px-4 py-3 text-[10px] text-gray-400 font-mono">${u.id ? u.id.substring(0, 8) + "..." : "—"}</td>
+        <td class="px-4 py-3 text-xs text-gray-200">${u.email}</td>
+        <td class="px-4 py-3"><span class="text-[10px] ${isMaster ? 'text-indigo-400 bg-indigo-500/10' : 'text-gray-400 bg-gray-700/30'} px-2 py-0.5 rounded-full">${isMaster ? "Master" : "Cliente"}</span></td>
+        <td class="px-4 py-3"><span class="text-[10px] ${isActive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'} px-2 py-0.5 rounded-full">${isActive ? "Ativo" : "Inativo"}</span></td>
+        <td class="px-4 py-3 text-[11px] text-gray-400">${u.criado_em ? new Date(u.criado_em).toLocaleDateString("pt-BR") : "—"}</td>
+        <td class="px-4 py-3 text-center">${isMaster ? '<span class="text-[10px] text-gray-600">—</span>' : `<button onclick="togglePlan('${u.id}', '${toggleStatus}')" class="text-[10px] ${isActive ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'} bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg transition font-medium">${toggleLabel}</button>`}</td>
+      </tr>`;
+    }).join("");
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-400 text-xs">Erro de conexão.</td></tr>';
+  }
+}
+
+async function togglePlan(userId, newStatus) {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = "...";
+  try {
+    const r = await fetch(`/api/admin/users/${userId}/plan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + (__session().token || "") },
+      body: JSON.stringify({ plano_status: newStatus }),
+    });
+    const data = await r.json();
+    if (data.success) {
+      const toast = document.createElement("div");
+      toast.className = "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm z-50";
+      toast.textContent = "Plano alterado para " + (newStatus === "ativo" ? "Ativo" : "Inativo");
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); loadUsers(); }, 1500);
+    } else {
+      alert(data.error || "Erro ao alterar plano");
+      btn.disabled = false;
+      btn.textContent = newStatus === "ativo" ? "Ativar" : "Desativar";
+    }
+  } catch (e) {
+    alert("Erro de conexão");
+    btn.disabled = false;
+    btn.textContent = newStatus === "ativo" ? "Ativar" : "Desativar";
+  }
+}
+</script>
+</body>
+</html>

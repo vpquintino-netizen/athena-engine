@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import { MercadoPagoConfig, Preference } from "mercadopago";
-import { findUserByEmail, createUser, query, seedMaster } from "./src/db.js";
+import { findUserByEmail, createUser, query, seedMaster, listAllUsers, updateUserPlan } from "./src/db.js";
 import {
   isMasterEmail, getMasterCred, generateToken,
   authMiddleware, requireActivePlan, requireMaster,
@@ -170,6 +170,52 @@ app.post("/api/public-trial", (req, res) => {
   res.json({ success: true, titulo: chosen.titulo, resultado: chosen.resultado });
 });
 
+/* ===== ADMIN ROUTES (MASTER ONLY) ===== */
+function adminAuth(req, res, next) {
+  authMiddleware(req, res, (err) => {
+    if (err) return;
+    requireMaster(req, res, () => next());
+  });
+}
+
+app.get("/admin.html", adminAuth, (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+app.get("/api/admin/users", adminAuth, async (_req, res) => {
+  try {
+    const users = await listAllUsers();
+    const sanitized = users.map(u => ({
+      id: u.id,
+      email: u.email,
+      tipo_usuario: u.tipo_usuario || "cliente",
+      plano_status: u.plano_status || "inativo",
+      criado_em: u.criado_em || u.created_at || null,
+    }));
+    res.json({ success: true, users: sanitized });
+  } catch (err) {
+    console.error("[Admin] Erro ao listar usuários:", err);
+    res.status(500).json({ error: "Erro ao carregar usuários" });
+  }
+});
+
+app.post("/api/admin/users/:id/plan", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { plano_status } = req.body;
+    if (!plano_status || !["ativo", "inativo"].includes(plano_status)) {
+      return res.status(400).json({ error: "Status inválido. Use 'ativo' ou 'inativo'." });
+    }
+    const updated = await updateUserPlan(id, plano_status);
+    if (!updated) return res.status(404).json({ error: "Usuário não encontrado" });
+    console.log(`[Admin] Plano de ${updated.email} alterado para: ${updated.plano_status}`);
+    res.json({ success: true, user: updated });
+  } catch (err) {
+    console.error("[Admin] Erro ao alterar plano:", err);
+    res.status(500).json({ error: "Erro ao alterar plano do usuário" });
+  }
+});
+
 app.use("/api", authMiddleware, requireActivePlan);
 
 app.post("/create-preference", async (req, res) => {
@@ -206,6 +252,43 @@ app.post("/webhook", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("Erro no webhook:", err);
+    res.sendStatus(200);
+  }
+});
+
+app.post("/webhooks/mercado-pago", async (req, res) => {
+  try {
+    const notification = req.body;
+    const topic = notification?.topic || notification?.type;
+    const resourceId = notification?.resource?.id || notification?.data?.id || req.query["data.id"];
+    console.log("[Webhook MP] Notificação recebida:", { topic, resourceId });
+    if (topic === "payment" || topic === "payment.updated" || (notification?.action === "payment.updated") || resourceId) {
+      if (!resourceId) return res.sendStatus(200);
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${resourceId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) {
+        console.error("[Webhook MP] Erro ao consultar pagamento:", response.status);
+        return res.sendStatus(200);
+      }
+      const payment = await response.json();
+      console.log("[Webhook MP] Pagamento consultado:", { id: payment.id, status: payment.status, external_ref: payment.external_reference });
+      if (payment.status === "approved") {
+        const externalRef = payment.external_reference || payment.payer?.email;
+        if (externalRef) {
+          const user = await findUserByEmail(externalRef);
+          if (user) {
+            await updateUserPlan(user.id, "ativo");
+            console.log(`[Webhook MP] Plano ativado para ${user.email} (${user.id})`);
+          } else {
+            console.log(`[Webhook MP] Usuário não encontrado para referência: ${externalRef}`);
+          }
+        }
+      }
+    }
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("[Webhook MP] Erro no processamento:", err);
     res.sendStatus(200);
   }
 });

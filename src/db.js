@@ -122,6 +122,51 @@ export async function createUser(email, hashedPassword, tipo_usuario = "cliente"
   }
 }
 
+export async function listAllUsers() {
+  const { pool: p, fallbackMode: fb, fallbackUsers: fbUsers, MASTERS: masters } = getPool();
+  if (fb || !p) {
+    const all = [];
+    for (const u of fbUsers.values()) all.push(u);
+    for (const m of masters) {
+      if (!all.some(x => x.email === m.email)) all.push(m);
+    }
+    return all;
+  }
+  try {
+    const result = await p.query("SELECT id, email, tipo_usuario, plano_status, criado_em FROM usuarios ORDER BY criado_em DESC");
+    return result.rows;
+  } catch {
+    const all = [];
+    for (const u of fbUsers.values()) all.push(u);
+    for (const m of masters) {
+      if (!all.some(x => x.email === m.email)) all.push(m);
+    }
+    return all;
+  }
+}
+
+export async function updateUserPlan(userId, status) {
+  const { pool: p, fallbackMode: fb, fallbackUsers: fbUsers } = getPool();
+  if (fb || !p) {
+    for (const u of fbUsers.values()) {
+      if (u.id === userId) { u.plano_status = status; return { id: u.id, email: u.email, plano_status: u.plano_status }; }
+    }
+    return null;
+  }
+  try {
+    const result = await p.query(
+      "UPDATE usuarios SET plano_status = $1 WHERE id = $2 RETURNING id, email, plano_status",
+      [status, userId]
+    );
+    return result.rows[0] || null;
+  } catch {
+    for (const u of fbUsers.values()) {
+      if (u.id === userId) { u.plano_status = status; return { id: u.id, email: u.email, plano_status: u.plano_status }; }
+    }
+    return null;
+  }
+}
+
 export async function seedMaster() {
   const { pool: p, fallbackMode: fb, MASTERS: masters } = getPool();
   if (fb || !p) return;
