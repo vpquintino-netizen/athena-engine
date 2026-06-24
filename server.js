@@ -6,6 +6,8 @@ import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { findUserByEmail, createUser, query, seedMaster, listAllUsers, updateUserPlan } from "./src/db.js";
+import { processScheduledPosts } from "./src/cronAgent.js";
+import { initWhatsAppBot, getWhatsAppStatus, updateBotContext } from "./src/whatsappBot.js";
 import {
   isMasterEmail, getMasterCred, generateToken,
   authMiddleware, requireActivePlan, requireMaster,
@@ -548,10 +550,68 @@ app.post("/api/agent/reject/:id", (req, res) => {
   res.json({ success: true, message: "Descoberta recusada." });
 });
 
+app.post("/api/posts/schedule", authMiddleware, async (req, res) => {
+  try {
+    const { platform, media_type, content, media_url, scheduled_at } = req.body;
+    if (!platform || !content || !scheduled_at) {
+      return res.status(400).json({ error: "platform, content e scheduled_at são obrigatórios" });
+    }
+    const result = await query(
+      `INSERT INTO user_posts (user_id, platform, content, media_url, media_type, scheduled_at)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [req.user.id, platform, content, media_url || null, media_type || "feed", scheduled_at]
+    );
+    res.status(201).json({ success: true, postId: result.rows[0].id });
+  } catch (err) {
+    console.error("[Posts] Erro ao agendar:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/posts/queue", authMiddleware, async (req, res) => {
+  try {
+    const result = await query(
+      "SELECT * FROM user_posts WHERE user_id = $1 ORDER BY scheduled_at ASC LIMIT 50",
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("[Posts] Erro ao listar fila:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/agent/whatsapp-status", (_req, res) => {
+  res.json({ status: getWhatsAppStatus() });
+});
+
+app.post("/api/agent/whatsapp-config", authMiddleware, async (req, res) => {
+  try {
+    const { user_id, context_prompt } = req.body;
+    if (!context_prompt) return res.status(400).json({ error: "context_prompt é obrigatório" });
+    await updateBotContext(context_prompt);
+    res.json({ success: true, message: "Contexto do WhatsApp atualizado!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/agent/trigger-now", authMiddleware, async (_req, res) => {
+  try {
+    await processScheduledPosts();
+    res.json({ success: true, message: "Agente disparado manualmente com sucesso!" });
+  } catch (err) {
+    console.error("[Agente] Erro no disparo manual:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 seedMaster().then(() => {
   seedAgentDiscoveries();
   startSecurityScanner();
+  initWhatsAppBot();
+  setInterval(processScheduledPosts, 60000);
   app.listen(PORT, () => console.log(`Athena IA rodando em https://localhost:${PORT}`));
 });

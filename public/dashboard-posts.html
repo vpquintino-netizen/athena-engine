@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Athena IA — Agendamento de Postagens</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #0a0a0f; }
+    .glass { background: rgba(17,17,27,0.8); backdrop-filter: blur(20px); }
+    .glow-card { box-shadow: 0 0 40px rgba(99,102,241,0.06); }
+    .badge { padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body class="text-white min-h-screen">
+  <nav class="glass border-b border-gray-800/60 px-5 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <svg class="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="text-base font-bold">Athena<span class="text-indigo-400">IA</span> <span class="text-[10px] text-gray-500 font-normal">Posts</span></span>
+    </div>
+    <a href="/dashboard.html" class="text-xs text-indigo-400 hover:text-indigo-300 transition">Painel</a>
+  </nav>
+
+  <main class="max-w-3xl mx-auto p-4 md:p-6">
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-5 glow-card mb-5">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2">🤖 Agendar Nova Publicação</h2>
+      <form id="postForm" class="space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-gray-400 font-medium mb-1 block">Rede Social</label>
+            <select id="platform" required class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-500">
+              <option value="instagram">Instagram</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="twitter">X / Twitter</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 font-medium mb-1 block">Formato</label>
+            <select id="media_type" required class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-500">
+              <option value="feed">Feed / Carrossel</option>
+              <option value="reels">Reels / Vídeo</option>
+              <option value="stories">Stories</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 font-medium mb-1 block">Legenda</label>
+          <textarea id="content" required placeholder="Texto gerado pela IA..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 resize-none min-h-[100px]"></textarea>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-gray-400 font-medium mb-1 block">URL da Mídia</label>
+            <input type="url" id="media_url" placeholder="https://exemplo.com/imagem.jpg" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 font-medium mb-1 block">Data/Hora da Postagem</label>
+            <input type="datetime-local" id="scheduled_at" required class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-500">
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold px-4 py-3 rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">Confirmar Agendamento</button>
+      </form>
+    </div>
+
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-5 glow-card">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📊 Fila de Postagens</h2>
+      <div id="postsQueue" class="space-y-3"></div>
+    </div>
+  </main>
+
+  <script>
+    async function api(path, options = {}) {
+      const sd = JSON.parse(localStorage.getItem("athena_session") || "{}");
+      const r = await fetch(path, {
+        ...options,
+        headers: { "Content-Type": "application/json", ...(sd.token ? { Authorization: "Bearer " + sd.token } : {}), ...options.headers },
+      });
+      return r;
+    }
+
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        platform: document.getElementById("platform").value,
+        media_type: document.getElementById("media_type").value,
+        content: document.getElementById("content").value,
+        media_url: document.getElementById("media_url").value,
+        scheduled_at: document.getElementById("scheduled_at").value,
+      };
+      const r = await api("/api/posts/schedule", { method: "POST", body: JSON.stringify(data) });
+      if (r.ok) {
+        alert("✅ Post agendado com sucesso!");
+        document.getElementById("postForm").reset();
+        loadQueue();
+      } else {
+        const err = await r.json();
+        alert("❌ Erro: " + (err.error || "Falha ao agendar"));
+      }
+    });
+
+    async function loadQueue() {
+      const el = document.getElementById("postsQueue");
+      const r = await api("/api/posts/queue");
+      if (!r.ok) { el.innerHTML = '<p class="text-gray-500 text-xs">Erro ao carregar fila.</p>'; return; }
+      const posts = await r.json();
+      if (!posts.length) { el.innerHTML = '<p class="text-gray-500 text-xs">Nenhum post agendado.</p>'; return; }
+      el.innerHTML = posts.map(p => `
+        <div class="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">${p.platform?.toUpperCase()}</span>
+              <span class="text-[10px] text-gray-500">${p.media_type?.toUpperCase()}</span>
+            </div>
+            <p class="text-xs text-gray-300 truncate">${p.content?.substring(0, 120)}</p>
+            <p class="text-[10px] text-gray-600 mt-1">${p.scheduled_at ? new Date(p.scheduled_at).toLocaleString("pt-BR") : "—"}</p>
+          </div>
+          <span class="badge ${p.status === 'published' ? 'bg-green-500/10 text-green-400' : 'bg-indigo-500/10 text-indigo-400'} shrink-0">${p.status === 'published' ? 'Publicado' : 'Agendado'}</span>
+        </div>
+      `).join("");
+    }
+
+    loadQueue();
+  </script>
+</body>
+</html>

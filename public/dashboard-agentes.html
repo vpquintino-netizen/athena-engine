@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athena IA - Painel de Controle de Agentes</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0f172a; margin: 0; padding: 30px; color: #f8fafc; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; }
+        h2 { margin-top: 0; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: #94a3b8; }
+        select, textarea, input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #fff; box-sizing: border-box; }
+        .btn { background: #0284c7; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn:hover { background: #0369a1; }
+        .status-box { padding: 15px; background: #334155; border-radius: 8px; font-weight: bold; text-align: center; color: #34d399; margin-bottom: 15px; }
+        .sync-container { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; max-width: 1200px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .btn-social { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 10px; color: white; }
+        .btn-insta { background: #d62976; }
+        .btn-linkedin { background: #0077b5; }
+        .toggle-autopilot { background: #16a34a; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold; border: none; cursor: pointer; }
+        .template-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .template-badge { display: inline-block; background: #334155; color: #38bdf8; padding: 6px 12px; border-radius: 20px; margin-right: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; margin-bottom: 5px; }
+        .template-badge:hover { background: #38bdf8; color: #0f172a; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #fff; margin-bottom: 30px;">🤖 Hub de Controle de Agentes Autônomos - Athena IA</h1>
+
+    <div class="sync-container">
+        <div>
+            <h3 style="margin: 0; color: #34d399;">🔗 Vincular Suas Redes Sociais</h3>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #94a3b8;">Conecte seus perfis para que a Athena IA assuma a criação e postagem.</p>
+        </div>
+        <div>
+            <button class="btn-social btn-insta" onclick="connectPlatform('instagram')">Conectar Instagram</button>
+            <button class="btn-social btn-linkedin" onclick="connectPlatform('linkedin')">Conectar LinkedIn</button>
+        </div>
+    </div>
+
+    <div class="template-box">
+        <h3 style="margin-top:0; color: #fbbf24;">⚡ Modelos Rápidos:</h3>
+        <p style="font-size: 14px; color: #94a3b8; margin-bottom: 15px;">Clique para injetar no formulário e customize os dados entre [ ].</p>
+        <div class="template-badge" onclick="applyTemplate('post', '🚀 NOVIDADE NO AR! Acabamos de liberar o nosso novo serviço focado em [Benefício]. Acesse o link na bio ou comente AGORA!')">📸 Post de Atração</div>
+        <div class="template-badge" onclick="applyTemplate('post', '💡 DICA DO DIA: [Número]% das empresas falham por não aplicar [Estratégia]. Salve este post!')">💡 Post Educativo</div>
+        <div class="template-badge" onclick="applyTemplate('whatsapp', 'Olá! Sou o assistente da Athena IA. Como posso ajudar?\n\n1 - Conhecer Planos\n2 - Falar com Suporte\n3 - Solicitar Orçamento')">💬 Saudação WhatsApp</div>
+        <div class="template-badge" onclick="applyTemplate('whatsapp', 'Parabéns! 🎉 Seu link com desconto: [Link]. Ficamos no aguardo!')">💳 Conversão WhatsApp</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>📸 Agente de Redes Sociais</h2>
+            <form id="postForm">
+                <div class="form-group">
+                    <label>Rede Social</label>
+                    <select id="platform"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Formato</label>
+                    <select id="media_type"><option value="feed">Feed</option><option value="reels">Reels</option><option value="stories">Stories</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Texto da Publicação</label>
+                    <textarea id="content" required placeholder="Escreva ou aplique um modelo rápido acima..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL da Mídia</label>
+                    <input type="url" id="media_url" placeholder="https://exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Agendamento</label>
+                    <input type="datetime-local" id="scheduled_at" required>
+                </div>
+                <button type="submit" class="btn">Agendar Disparo Automatizado</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div>
+                <h2>💬 Chatbot WhatsApp Comercial</h2>
+                <div class="form-group">
+                    <label>Texto Base de Resposta do Bot</label>
+                    <textarea id="bot_context" placeholder="Mensagem padrão que o robô responderá..."></textarea>
+                    <button class="btn" style="background: #3b82f6; font-size: 14px; padding: 8px;" onclick="saveBotContext()">Atualizar Resposta Padrão</button>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+                <p style="color: #94a3b8; font-size: 14px;">Status do motor:</p>
+                <div class="status-box" id="botStatus">Conectando...</div>
+            </div>
+            <button class="btn" style="background: #16a34a;" onclick="checkStatus()">Verificar Conexão</button>
+        </div>
+
+        <div class="card" style="grid-column: span 2; text-align: center; padding: 40px; background: radial-gradient(circle at top, #1e293b, #0f172a);">
+            <h2 style="border: none; color: #fbbf24;">🚀 Módulo de Piloto Automático da IA</h2>
+            <p style="color: #cbd5e1; max-width: 600px; margin: 0 auto 20px auto;">Ao ativar, nossa IA analisará seu nicho, criará os criativos, redigirá as legendas com gatilhos mentais e agendará os posts automaticamente.</p>
+            <button class="toggle-autopilot" id="autopilotBtn" onclick="toggleAutopilot()">ATIVAR AGENTE AUTÔNOMO (PILOTO AUTOMÁTICO)</button>
+        </div>
+    </div>
+
+    <script>
+        let autopilotActive = false;
+
+        function connectPlatform(platform) {
+            alert(`🔄 Redirecionando para autenticação OAuth do ${platform.toUpperCase()}...`);
+        }
+
+        function toggleAutopilot() {
+            autopilotActive = !autopilotActive;
+            const btn = document.getElementById('autopilotBtn');
+            if (autopilotActive) {
+                btn.innerText = "🤖 PILOTO AUTOMÁTICO ATIVO";
+                btn.style.background = "#dc2626";
+                alert("✨ Athena IA assumiu o controle das suas redes!");
+            } else {
+                btn.innerText = "ATIVAR AGENTE AUTÔNOMO (PILOTO AUTOMÁTICO)";
+                btn.style.background = "#16a34a";
+            }
+        }
+
+        function applyTemplate(target, text) {
+            if (target === 'post') document.getElementById('content').value = text;
+            else if (target === 'whatsapp') document.getElementById('bot_context').value = text;
+        }
+
+        async function saveBotContext() {
+            const context = document.getElementById('bot_context').value;
+            const res = await fetch('/api/agent/whatsapp-config', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: 1, context_prompt: context })
+            });
+            if (res.ok) alert('✅ Modelo de resposta atualizado!');
+        }
+
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                platform: document.getElementById('platform').value,
+                media_type: document.getElementById('media_type').value,
+                content: document.getElementById('content').value,
+                media_url: document.getElementById('media_url').value,
+                scheduled_at: document.getElementById('scheduled_at').value
+            };
+            const res = await fetch('/api/posts/schedule', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) { alert('🚀 Post agendado!'); document.getElementById('postForm').reset(); }
+        });
+
+        async function checkStatus() {
+            const res = await fetch('/api/agent/whatsapp-status');
+            const data = await res.json();
+            document.getElementById('botStatus').innerText = data.status;
+        }
+        setInterval(checkStatus, 5000);
+        checkStatus();
+    </script>
+</body>
+</html>
