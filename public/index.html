@@ -1,70 +1,343 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athena IA - Automação de Marketing Digital Ponta a Ponta</title>
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0f172a; margin: 0; padding: 0; color: #f8fafc; }
-        header { background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 60px 20px; text-align: center; border-bottom: 1px solid #1e293b; }
-        header h1 { margin: 0; font-size: 42px; color: #fff; }
-        header h1 span { color: #38bdf8; }
-        header p { color: #94a3b8; font-size: 18px; margin: 15px 0 0 0; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        .section-title { text-align: center; color: #fbbf24; margin-bottom: 40px; font-size: 28px; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .feature-card { background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; text-align: center; transition: transform 0.2s; }
-        .feature-card:hover { transform: translateY(-5px); border-color: #38bdf8; }
-        .feature-card h3 { color: #38bdf8; font-size: 22px; margin-top: 0; }
-        .feature-card p { color: #cbd5e1; font-size: 15px; line-height: 1.6; }
-        .step-badge { background: #334155; color: #fbbf24; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .cta-box { background: radial-gradient(circle at top, #1e293b, #0f172a); padding: 50px; border-radius: 16px; text-align: center; border: 1px solid #334155; margin-top: 50px; }
-        .btn-main { display: inline-block; background: #16a34a; color: white; padding: 16px 32px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 18px; transition: background 0.2s; margin-top: 20px; }
-        .btn-main:hover { background: #15803d; }
-        footer { text-align: center; padding: 30px; color: #64748b; font-size: 14px; border-top: 1px solid #1e293b; margin-top: 50px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Athena IA — Ecossistema Definitivo de Inteligência Artificial para Empresas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { background:#0a0a0f; color:#e5e7eb; }
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#3f3f5e; border-radius:10px; }
+    .bg-grid { background-image:radial-gradient(rgba(99,102,241,0.04) 1px, transparent 1px); background-size:40px 40px; }
+    .glass { background:rgba(17,17,27,0.8); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
+    .glow { box-shadow:0 0 60px rgba(99,102,241,0.08), 0 0 120px rgba(99,102,241,0.04); }
+    .glow-card { box-shadow:0 0 40px rgba(99,102,241,0.06); transition:all 0.3s ease; }
+    .glow-card:hover { transform:translateY(-4px); box-shadow:0 8px 40px rgba(99,102,241,0.15); }
+    .hero-gradient { background:linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .btn-primary { background:linear-gradient(135deg, #6366f1, #a855f7); transition:all 0.3s ease; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(99,102,241,0.35); }
+    .btn-outline { border:1px solid rgba(99,102,241,0.3); transition:all 0.3s ease; }
+    .btn-outline:hover { border-color:#6366f1; background:rgba(99,102,241,0.1); transform:translateY(-1px); }
+    .pricing-card { background:linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05)); border:1px solid rgba(99,102,241,0.15); }
+    .feature-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation:fadeIn 0.6s ease-out forwards; opacity:0; }
+    .fade-in:nth-child(1) { animation-delay:0.1s; }
+    .fade-in:nth-child(2) { animation-delay:0.2s; }
+    .fade-in:nth-child(3) { animation-delay:0.3s; }
+    .fade-in:nth-child(4) { animation-delay:0.4s; }
+    #lgpd-banner { transition:transform 0.4s ease, opacity 0.4s ease; }
+    #lgpd-banner.hidden-banner { transform:translateY(100%); opacity:0; pointer-events:none; }
+    @media (max-width:767px) {
+      #nav-menu { position:fixed; top:0; left:0; width:100%; height:100vh; background:rgba(17,17,27,0.98); backdrop-filter:blur(20px); flex-direction:column; align-items:center; justify-content:center; gap:2rem; transform:translateX(100%); transition:transform 0.3s ease; z-index:40; }
+      #nav-menu.open { transform:translateX(0); }
+      #nav-toggle { display:flex; }
+      .hero-title { font-size:2.25rem; line-height:1.2; }
+      .hero-sub { font-size:1rem; }
+      section { padding-left:1rem; padding-right:1rem; }
+      .grid-cols-2 { grid-template-columns:1fr; }
+      .grid-cols-3 { grid-template-columns:1fr; }
+    }
+    @media (max-width:480px) {
+      .hero-title { font-size:1.75rem; }
+      .text-5xl { font-size:2.5rem; }
+      .p-8 { padding:1rem; }
+    }
+  </style>
 </head>
-<body>
+<body class="bg-grid">
 
-    <header>
-        <h1>🤖 Bem-vindo à <span>Athena IA</span></h1>
-        <p>A única plataforma SaaS que assume o marketing e as vendas do seu negócio em piloto automático.</p>
-        <a href="/dashboard-agentes.html" class="btn-main">Acessar Painel de Agentes Free</a>
-    </header>
-
-    <div class="container">
-        <h2 class="section-title">✨ Conheça os Nossos Novos Agentes Autônomos</h2>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <span class="step-badge">100% Autônomo</span>
-                <h3>📸 Piloto Automático de Redes</h3>
-                <p>Nossa IA analisa o seu nicho diariamente, cria as artes conceituais, redige as legendas com gatilhos mentais e posta sozinha no seu Instagram, Reels e LinkedIn sem você precisar digitar uma única palavra.</p>
-            </div>
-
-            <div class="feature-card">
-                <span class="step-badge">Grátis e Sem Taxas</span>
-                <h3>💬 Chatbot WhatsApp com Memória</h3>
-                <p>Treine o robô colando as regras e preços da sua empresa. Ele atende, responde dúvidas de leads usando inteligência contextual e salva todo o histórico de conversão no seu painel.</p>
-            </div>
-
-            <div class="feature-card">
-                <span class="step-badge">Central de Tráfego</span>
-                <h3>🎯 Tráfego Pago e Orgânico Centralizado</h3>
-                <p>Crie, configure e acompanhe campanhas no Facebook Ads e Google Ads direto de dentro da Athena IA. Gerencie seu orçamento e analise taxas de cliques (CTR) e custos por clique (CPC) em tempo real.</p>
-            </div>
-        </div>
-
-        <div class="cta-box">
-            <h2 style="color: #fff; margin-top: 0;">Pronto para Multiplicar Suas Vendas?</h2>
-            <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Vincule suas contas de canais comerciais em segundos e deixe que a inteligência artificial assuma todo o trabalho pesado de marketing e prospecção do seu negócio.</p>
-            <a href="/dashboard-agentes.html" class="btn-main" style="background: #0284c7;">Começar Agora Gratuitamente</a>
-        </div>
+<nav class="fixed top-0 left-0 w-full z-50 glass border-b border-gray-800/60">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+    <a href="#" class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="text-lg font-bold tracking-tight">Athena<span class="text-indigo-400">IA</span></span>
+    </a>
+    <div id="nav-menu" class="hidden md:flex items-center gap-8">
+      <a href="#recursos" class="text-sm text-gray-400 hover:text-white transition">Recursos</a>
+      <a href="#planos" class="text-sm text-gray-400 hover:text-white transition">Planos</a>
+      <a href="#contato" class="text-sm text-gray-400 hover:text-white transition">Fale Conosco</a>
     </div>
+    <div class="flex items-center gap-3">
+      <a href="/dashboard.html" class="btn-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/25">Acesso ao Painel</a>
+      <button id="nav-toggle" class="md:hidden p-2 text-gray-400 hover:text-white transition" aria-label="Menu">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
 
-    <footer>
-        <p>&copy; 2026 Athena IA - Todos os direitos reservados. Proteção e conformidade LGPD ativa. Suporte: athenaia1@hotmail.com</p>
-    </footer>
+<section class="min-h-screen flex items-center justify-center pt-20 pb-16 px-4 relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-b from-indigo-900/10 via-transparent to-transparent pointer-events-none"></div>
+  <div class="max-w-5xl mx-auto text-center relative z-10">
+    <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-6">
+      <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+      <span class="text-xs text-indigo-300 font-medium">Sistema Operacional 24/7 — Online</span>
+    </div>
+    <h1 class="hero-title text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
+      O <span class="hero-gradient">Ecossistema Definitivo</span><br />
+      de IA para Empresas
+    </h1>
+    <p class="hero-sub text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+      O Athena IA unifica automação de marketing, inteligência jurídica, logística, OCR, CRM, 
+      analytics preditivos e muito mais em um único painel corporativo com inteligência artificial 
+      autônoma. Uma plataforma SaaS completa para transformar seu negócio.
+    </p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="#planos" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base shadow-lg shadow-indigo-600/25">Comece Agora — R$ 350/mês</a>
+      <a href="#recursos" class="btn-outline text-gray-300 font-medium px-8 py-3.5 rounded-xl text-base">Explorar Recursos</a>
+    </div>
+    <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+      <div class="text-center"><p class="text-3xl font-bold text-white">8</p><p class="text-xs text-gray-500 mt-1">Módulos Operacionais</p></div>
+      <div class="text-center"><p class="text-3xl font-bold text-white">24/7</p><p class="text-xs text-gray-500 mt-1">Monitoramento Contínuo</p></div>
+      <div class="text-center"><p class="text-3xl font-bold text-white">R$ 350</p><p class="text-xs text-gray-500 mt-1">Plano Único Acessível</p></div>
+      <div class="text-center"><p class="text-3xl font-bold text-white">100%</p><p class="text-xs text-gray-500 mt-1">Cobertura Jurídica</p></div>
+    </div>
+  </div>
+</section>
 
+<section id="recursos" class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">Plataforma Completa</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-white mt-4">8 Módulos, Um Único Painel</h2>
+      <p class="text-gray-400 mt-3 max-w-2xl mx-auto">Cada módulo foi projetado para resolver um desafio real do seu negócio, com dados isolados por UUID e criptografia SSL ponta a ponta.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-pink-500 to-rose-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">Marketing & Comercial</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Kanban de leads com drag-and-drop, geração de UTMs, análise de tráfego pago, criação de landing pages com Tailwind e snippets de e-mail comercial. Acompanhe conversões e calcule CPA automaticamente.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-cyan-500 to-blue-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">Projetos & Analytics</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Dashboard com indicadores em tempo real, ideação caixa-alta para novos negócios, engenharia reversa de concorrentes e orquestração de dados com cache inteligente no navegador.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-emerald-500 to-teal-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">Jurídico</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Validação de CNPJ/CPF via BrasilAPI, calculadora de precificação com margem de lucro, gerador de contratos, emissor de recibos em PDF e termo LGPD. Conformidade legal automatizada.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-amber-500 to-orange-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">Logística & Estoque</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Rastreamento de fretes por UF, cálculo de frete por CEP via API dos Correios, gestão de estoque com alertas de nível crítico e histórico de movimentações com timeline.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-violet-500 to-purple-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">OCR — Leitura de Imagens</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Upload e extração de texto via OCR com PaddleOCR, visualização lado a lado (imagem + texto extraído), busca por palavras-chave nos documentos e estatísticas de documentos processados.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-sky-500 to-indigo-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">CRM</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Gestão completa de leads com kanban, cadastro de clientes com CNPJ/CPF e endereço via BrasilAPI, funil de vendas com estágios personalizáveis e histórico de interações.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-blue-500 to-cyan-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">Meta & TikTok Ads</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Simulador de anúncios com cálculo de cliques, impressões e orçamento, planejamento de campanhas segmentadas por público-alvo e gerador de headlines e descrições criativas.</p>
+      </div>
+      <div class="fade-in bg-gray-900/50 border border-gray-800/60 rounded-2xl p-6 glow-card">
+        <div class="feature-icon bg-gradient-to-br from-green-500 to-emerald-600 mb-4"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg></div>
+        <h3 class="text-lg font-semibold text-white mb-2">B2B — Rede de Negócios</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">Marketplace B2B com anúncios de empresas, matchmaking inteligente por setor e localização, chat em tempo real para negociação e reputação com selos de verificação.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="planos" class="py-20 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">Investimento</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-white mt-4">Plano Único. Completo.</h2>
+      <p class="text-gray-400 mt-3 max-w-xl mx-auto">Sem pegadinhas. Um único plano com acesso total a todos os 8 módulos, atualizações vitalícias e suporte prioritário.</p>
+    </div>
+    <div class="max-w-md mx-auto">
+      <div class="pricing-card rounded-3xl p-8 glow relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+        <div class="text-center relative z-10">
+          <span class="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">MAIS POPULAR</span>
+          <div class="mt-6">
+            <span class="text-5xl font-extrabold text-white">R$ 350</span>
+            <span class="text-gray-500 text-lg">/mês</span>
+          </div>
+          <ul class="mt-6 space-y-3 text-left">
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Acesso completo a todos os 8 módulos</li>
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Agente autônomo com descobertas de IA</li>
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Blindagem Total com monitoramento 24/7</li>
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Integração Mercado Pago</li>
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Dados isolados por UUID em PostgreSQL SSL</li>
+            <li class="flex items-start gap-3 text-sm text-gray-300"><svg class="w-5 h-5 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Atualizações e suporte inclusos</li>
+          </ul>
+          <button id="assinar-btn" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base shadow-lg shadow-indigo-600/25 w-full mt-8">Assinar Agora — R$ 350/mês</button>
+          <p class="text-xs text-gray-500 mt-4">Pagamento 100% seguro via <strong class="text-gray-400">Mercado Pago</strong></p>
+        </div>
+      </div>
+      <div class="mt-6 bg-gray-900/30 border border-gray-800/40 rounded-2xl p-5 text-center">
+        <p class="text-xs text-gray-400 leading-relaxed">
+          <strong class="text-gray-300">Direito de Arrependimento:</strong> Nos termos do <strong class="text-gray-300">Artigo 49 do Código de Defesa do Consumidor</strong> (Lei nº 8.078/90), 
+          o contratante pode desistir da contratação do serviço no prazo de <strong class="text-gray-300">7 (sete) dias corridos</strong> 
+          a contar da data de assinatura, com direito ao reembolso integral dos valores pagos, atualizados monetariamente.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contato" class="py-20 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <span class="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">Canal Direto</span>
+    <h2 class="text-3xl md:text-4xl font-bold text-white mt-4 mb-4">Fale Conosco</h2>
+    <p class="text-gray-400 mb-8">Tem dúvidas sobre o Athena IA, precisa de suporte ou quer uma demonstração personalizada? Nossa equipe está pronta para atender.</p>
+    <a href="mailto:athenaia1@hotmail.com" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-base shadow-lg shadow-indigo-600/25 inline-flex items-center gap-3">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Fale Conosco — athenaia1@hotmail.com
+    </a>
+  </div>
+</section>
+
+<footer class="border-t border-gray-800/60 py-12 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <span class="text-base font-bold">Athena<span class="text-indigo-400">IA</span></span>
+        </div>
+        <p class="text-xs text-gray-500 leading-relaxed">Ecossistema definitivo de Inteligência Artificial para empresas. SaaS com 8 módulos integrados, segurança SSL e conformidade com a LGPD.</p>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-3">Documentos Legais</h4>
+        <button onclick="openModal('termos')" class="block text-xs text-gray-500 hover:text-indigo-400 transition mb-2">Termos de Uso</button>
+        <button onclick="openModal('privacidade')" class="block text-xs text-gray-500 hover:text-indigo-400 transition mb-2">Política de Privacidade</button>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-gray-300 mb-3">Contato</h4>
+        <a href="mailto:athenaia1@hotmail.com" class="block text-xs text-gray-500 hover:text-indigo-400 transition">athenaia1@hotmail.com</a>
+        <p class="text-xs text-gray-600 mt-3">Todas as comunicações são tratadas com confidencialidade conforme a LGPD.</p>
+      </div>
+    </div>
+    <div class="border-t border-gray-800/40 pt-6 text-center">
+      <p class="text-xs text-gray-600">2024 Athena IA. Todos os direitos reservados. CNPJ em regularização. Plataforma SaaS hospedada em infraestrutura cloud com criptografia SSL/TLS.</p>
+    </div>
+  </div>
+</footer>
+
+<div id="termos-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto glow-card">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-white">Termos de Uso</h3>
+      <button onclick="closeModal('termos')" class="text-gray-500 hover:text-white text-xl">&times;</button>
+    </div>
+    <div class="text-xs text-gray-400 leading-relaxed space-y-3">
+      <p><strong>1. Aceitação dos Termos.</strong> Ao acessar ou utilizar a plataforma Athena IA, o usuário declara estar ciente e concorda integralmente com os presentes Termos de Uso. Caso não concorde com qualquer disposição, o usuário deve interromper imediatamente o uso da plataforma.</p>
+      <p><strong>2. Contratação do Serviço (SaaS).</strong> O Athena IA é oferecido como Software como Serviço (SaaS) mediante assinatura mensal no valor de R$ 350,00 (trezentos e cinquenta reais). O pagamento é processado exclusivamente via Mercado Pago. A assinatura é renovada automaticamente a cada período de 30 (trinta) dias corridos, podendo ser cancelada a qualquer momento pelo usuário.</p>
+      <p><strong>3. Direito de Arrependimento.</strong> Nos termos do Artigo 49 da Lei nº 8.078/90 (Código de Defesa do Consumidor), o usuário pode desistir da contratação no prazo de 7 (sete) dias corridos a contar da data da assinatura, com direito ao reembolso integral dos valores pagos, devidamente atualizados. O pedido de reembolso deve ser enviado para o e-mail de contato oficial.</p>
+      <p><strong>4. Isolamento de Dados via UUID.</strong> Todos os dados dos usuários são armazenados com isolamento rigoroso por identificador único universal (UUID) em banco PostgreSQL com conexão criptografada via SSL/TLS. Cada usuário possui um UUID exclusivo atribuído no momento do cadastro, e todas as consultas ao banco de dados são filtradas por este identificador, garantindo que nenhum usuário tenha acesso a dados de terceiros.</p>
+      <p><strong>5. Retenção de Logs de Acesso.</strong> A plataforma mantém registros de acesso (logs) contendo endereço IP, agente do usuário, data e hora da requisição e ações realizadas dentro do painel. Estes logs são retidos pelo período mínimo de 6 (seis) meses para fins de auditoria, segurança e cumprimento de obrigações legais, conforme o Marco Civil da Internet (Lei nº 12.965/14).</p>
+      <p><strong>6. Segurança e Criptografia.</strong> Todas as comunicações entre o cliente e o servidor são protegidas por criptografia SSL/TLS. As senhas dos usuários são armazenadas utilizando bcrypt com fator de custo 10. Tokens de autenticação JWT com expiração de 7 (sete) dias são utilizados para controle de sessão.</p>
+      <p><strong>7. Uso Aceitável.</strong> O usuário compromete-se a utilizar a plataforma exclusivamente para fins lícitos, sendo vedada a prática de qualquer atividade que viole a legislação brasileira, direitos de terceiros ou as diretrizes de uso da plataforma. O descumprimento poderá resultar no bloqueio imediato da conta.</p>
+      <p><strong>8. Limitação de Responsabilidade.</strong> O Athena IA não se responsabiliza por danos indiretos, lucros cessantes ou interrupção de negócios decorrentes do uso ou da impossibilidade de uso da plataforma, dentro dos limites permitidos pela legislação aplicável.</p>
+      <p><strong>9. Disposições Gerais.</strong> Estes Termos são regidos pela legislação brasileira. Qualquer controvérsia será dirimida no foro da Comarca de São Paulo/SP. A plataforma reserva-se o direito de alterar estes Termos a qualquer momento, comunicando os usuários com antecedência mínima de 30 (trinta) dias.</p>
+    </div>
+  </div>
+</div>
+
+<div id="privacidade-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto glow-card">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-white">Política de Privacidade</h3>
+      <button onclick="closeModal('privacidade')" class="text-gray-500 hover:text-white text-xl">&times;</button>
+    </div>
+    <div class="text-xs text-gray-400 leading-relaxed space-y-3">
+      <p><strong>1. Coleta de Dados.</strong> A plataforma Athena IA coleta os seguintes dados pessoais dos usuários: nome, endereço de e-mail, CPF/CNPJ (quando informado), endereço IP e dados de navegação. A coleta ocorre no momento do cadastro e durante a utilização dos serviços.</p>
+      <p><strong>2. Finalidade do Tratamento.</strong> Os dados coletados são utilizados exclusivamente para: (a) prestação dos serviços contratados; (b) processamento de pagamentos via Mercado Pago; (c) cumprimento de obrigações legais e regulatórias; (d) melhoria contínua da plataforma; e (e) comunicações transacionais.</p>
+      <p><strong>3. Base Legal.</strong> O tratamento de dados pessoais pela plataforma fundamenta-se nas seguintes bases legais da Lei nº 13.709/18 (LGPD): (a) mediante consentimento do titular (Art. 7º, I); (b) para execução de contrato (Art. 7º, V); e (c) para cumprimento de obrigação legal ou regulatória (Art. 7º, II).</p>
+      <p><strong>4. Compartilhamento de Dados.</strong> O Athena IA não comercializa dados pessoais. Os dados podem ser compartilhados exclusivamente com: (a) processadores de pagamento (Mercado Pago); (b) autoridades competentes mediante requisição judicial; e (c) prestadores de serviços de infraestrutura cloud com cláusulas contratuais de proteção de dados.</p>
+      <p><strong>5. Segurança dos Dados.</strong> Implementamos medidas técnicas e organizacionais para proteger os dados pessoais, incluindo: criptografia SSL/TLS em todas as comunicações, hash bcrypt para senhas, isolamento de dados por UUID em banco PostgreSQL, tokens JWT com expiração periódica e monitoramento contínuo de segurança.</p>
+      <p><strong>6. Retenção e Exclusão.</strong> Os dados são retidos pelo período necessário à prestação dos serviços e cumprimento de obrigações legais. O usuário pode solicitar a exclusão de seus dados a qualquer momento, exceto aqueles cuja retenção seja exigida por lei (como registros de acesso, retidos por 6 meses conforme Marco Civil da Internet).</p>
+      <p><strong>7. Direitos do Titular.</strong> Nos termos da LGPD, o usuário possui os seguintes direitos: (a) confirmação da existência de tratamento; (b) acesso aos dados; (c) correção de dados incompletos, inexatos ou desatualizados; (d) anonimização, bloqueio ou eliminação de dados desnecessários; (e) portabilidade dos dados; (f) eliminação dos dados tratados com consentimento; e (g) revogação do consentimento.</p>
+      <p><strong>8. Cookies e Tecnologias de Rastreamento.</strong> A plataforma utiliza cookies estritamente necessários para o funcionamento do sistema. Cookies de análise e preferências são utilizados somente mediante consentimento explícito do usuário, conforme detalhado no banner de cookies. O usuário pode gerenciar suas preferências a qualquer momento.</p>
+      <p><strong>9. Encaminhamento de Dados.</strong> Seus dados pessoais não são transferidos para fora do território nacional sem as garantias adequadas exigidas pela LGPD.</p>
+      <p><strong>10. Encarregado (DPO).</strong> O encarregado pelo tratamento de dados pessoais pode ser contatado exclusivamente pelo e-mail: athenaia1@hotmail.com. As solicitações serão respondidas no prazo máximo de 15 (quinze) dias úteis.</p>
+      <p><strong>11. Atualizações.</strong> Esta Política pode ser atualizada periodicamente. Os usuários serão notificados sobre alterações substanciais com antecedência mínima de 30 (trinta) dias.</p>
+    </div>
+  </div>
+</div>
+
+<div id="lgpd-banner" class="fixed bottom-0 left-0 w-full z-[200] glass border-t border-gray-800/60 p-4">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-start gap-3">
+      <svg class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      <div>
+        <p class="text-sm text-gray-300 font-medium">Proteção de Dados — LGPD</p>
+        <p class="text-xs text-gray-500 mt-1 max-w-2xl">Utilizamos cookies e tecnologias semelhantes para melhorar sua experiência, analisar o tráfego e personalizar conteúdos. Ao clicar em "Aceitar Todos", você consente com o uso de todas as tecnologias conforme nossa <button onclick="closeModalPro();openModal('privacidade')" class="text-indigo-400 underline">Política de Privacidade</button>. Você pode gerenciar as preferências a qualquer momento.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="lgpd-reject" class="btn-outline text-gray-400 text-xs font-medium px-4 py-2 rounded-lg">Recusar</button>
+      <button id="lgpd-accept" class="btn-primary text-white text-xs font-semibold px-6 py-2 rounded-lg">Aceitar Todos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("nav-toggle").addEventListener("click",()=>{
+  const m=document.getElementById("nav-menu");
+  m.classList.toggle("open");
+  if(m.classList.contains("open")){m.style.display="flex";}else{setTimeout(()=>{m.style.display="";},300);}
+});
+document.querySelectorAll("#nav-menu a").forEach(a=>a.addEventListener("click",()=>{
+  const m=document.getElementById("nav-menu");
+  if(window.innerWidth<768){m.classList.remove("open");setTimeout(()=>{m.style.display="";},300);}
+}));
+
+function openModal(id){document.getElementById(id+'-modal').classList.remove('hidden');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id+'-modal').classList.add('hidden');document.body.style.overflow='';}
+function closeModalPro(){document.getElementById('privacidade-modal').classList.add('hidden');document.body.style.overflow='';}
+document.querySelectorAll('[id$="-modal"]').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this){this.classList.add('hidden');document.body.style.overflow='';}});});
+
+(function lgpdInit(){
+  const banner=document.getElementById("lgpd-banner");
+  const acceptBtn=document.getElementById("lgpd-accept");
+  const rejectBtn=document.getElementById("lgpd-reject");
+  if(localStorage.getItem("lgpd_consent")){banner.classList.add("hidden-banner");return;}
+  acceptBtn.addEventListener("click",()=>{localStorage.setItem("lgpd_consent","accepted");banner.classList.add("hidden-banner");});
+  rejectBtn.addEventListener("click",()=>{localStorage.setItem("lgpd_consent","rejected");banner.classList.add("hidden-banner");});
+})();
+
+(function initCheckout(){
+  const btn=document.getElementById("assinar-btn");
+  const mpToken="APP_USR-3883518058311-062310-69ba6c3f465bc494b874ddd98f4caa6e-178431017";
+  btn.addEventListener("click",async()=>{
+    btn.disabled=true; btn.textContent="Gerando pagamento...";
+    try{
+      const sd=JSON.parse(localStorage.getItem("athena_session")||"{}");
+      const email=sd.email||"";
+      const r=await fetch("/create-preference",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({title:"Plano Athena IA - Mensal",quantity:1,unit_price:350,email})
+      });
+      const d=await r.json();
+      if(d.init_point){window.location.href=d.init_point;}
+      else{alert("Erro ao gerar pagamento. Tente novamente.");btn.disabled=false;btn.textContent="Assinar Agora — R$ 350/mês";}
+    }catch(e){alert("Erro de conexão. Tente novamente.");btn.disabled=false;btn.textContent="Assinar Agora — R$ 350/mês";}
+  });
+})();
+</script>
 </body>
 </html>
