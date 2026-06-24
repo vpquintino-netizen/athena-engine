@@ -1,33 +1,60 @@
-import { Client, LocalAuth } from "whatsapp-web.js";
+import wweb from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import { query } from "./db.js";
+
+const { Client, LocalAuth } = wweb;
 
 let botStatus = "Desconectado. Aguardando QR Code.";
 let customResponseCache = "";
 
 export function initWhatsAppBot() {
-  console.log("🤖 [WhatsApp Bot] Inicializando motor de escuta gratuito...");
+  console.log("🤖 [WhatsApp Bot] Inicializando motor otimizado para produção...");
 
   const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: { args: ["--no-sandbox", "--disable-setuid-sandbox"] },
+    puppeteer: {
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
+      ],
+    },
   });
 
   client.on("qr", (qr) => {
     botStatus = "Aguardando leitura de QR Code no painel";
-    console.log("👇 ESCANEIE O QR CODE ABAIXO PARA CONECTAR:");
     qrcode.generate(qr, { small: true });
   });
 
   client.on("ready", () => {
     botStatus = "Conectado e Operando online!";
-    console.log("🚀 [WhatsApp Bot] Chatbot Athena IA ativo.");
+    console.log("🚀 [WhatsApp Bot] Automação ativada.");
   });
 
   client.on("message", async (msg) => {
     if (msg.from.includes("@g.us")) return;
-    const reply = customResponseCache || "Olá! Sou o assistente virtual da Athena IA. Como posso ajudar?";
-    await msg.reply(reply);
+
+    const reply =
+      customResponseCache ||
+      "Olá! Sou o assistente virtual da Athena IA. Como posso ajudar?";
+    try {
+      await msg.reply(reply);
+      await query(
+        `INSERT INTO user_leads (user_id, lead_phone, status, estimated_value)
+         VALUES ($1, $2, 'atendido', 99.70) ON CONFLICT DO NOTHING`,
+        [1, msg.from]
+      );
+    } catch (e) {
+      if (!e.message?.includes("not available")) {
+        console.error("⚠️ [WhatsApp] Erro no disparo:", e.message);
+      }
+    }
   });
 
   client.initialize().catch((err) => console.error("Erro WhatsApp:", err.message));
@@ -46,8 +73,9 @@ export async function updateBotContext(contextPrompt) {
        ON CONFLICT (user_id) DO UPDATE SET context_prompt = $2`,
       [1, contextPrompt]
     );
-    console.log("[WhatsApp] Contexto do bot atualizado.");
   } catch (err) {
-    console.log("[WhatsApp] Cache atualizado (banco indisponível):", err.message);
+    if (!err.message?.includes("not available")) {
+      console.log("[WhatsApp] Cache salvo:", err.message);
+    }
   }
 }
