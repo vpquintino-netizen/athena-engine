@@ -6,8 +6,6 @@ import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { findUserByEmail, createUser, query, seedMaster, listAllUsers, updateUserPlan } from "./src/db.js";
-import { processScheduledPosts } from "./src/cronAgent.js";
-import { initWhatsAppBot, getWhatsAppStatus, updateBotContext } from "./src/whatsappBot.js";
 import {
   isMasterEmail, getMasterCred, generateToken,
   authMiddleware, requireActivePlan, requireMaster,
@@ -550,116 +548,10 @@ app.post("/api/agent/reject/:id", (req, res) => {
   res.json({ success: true, message: "Descoberta recusada." });
 });
 
-app.post("/api/posts/schedule", authMiddleware, async (req, res) => {
-  try {
-    const { platform, media_type, content, media_url, scheduled_at } = req.body;
-    if (!platform || !content || !scheduled_at) {
-      return res.status(400).json({ error: "platform, content e scheduled_at são obrigatórios" });
-    }
-    const result = await query(
-      `INSERT INTO user_posts (user_id, platform, content, media_url, media_type, scheduled_at)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [req.user.id, platform, content, media_url || null, media_type || "feed", scheduled_at]
-    );
-    res.status(201).json({ success: true, postId: result.rows[0].id });
-  } catch (err) {
-    console.error("[Posts] Erro ao agendar:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/posts/queue", authMiddleware, async (req, res) => {
-  try {
-    const result = await query(
-      "SELECT * FROM user_posts WHERE user_id = $1 ORDER BY scheduled_at ASC LIMIT 50",
-      [req.user.id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("[Posts] Erro ao listar fila:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/agent/whatsapp-status", (_req, res) => {
-  res.json({ status: getWhatsAppStatus() });
-});
-
-app.post("/api/agent/whatsapp-config", authMiddleware, async (req, res) => {
-  try {
-    const { user_id, context_prompt } = req.body;
-    if (!context_prompt) return res.status(400).json({ error: "context_prompt é obrigatório" });
-    await updateBotContext(context_prompt);
-    res.json({ success: true, message: "Contexto do WhatsApp atualizado!" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/api/agent/trigger-now", authMiddleware, async (_req, res) => {
-  try {
-    await processScheduledPosts();
-    res.json({ success: true, message: "Agente disparado manualmente com sucesso!" });
-  } catch (err) {
-    console.error("[Agente] Erro no disparo manual:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ===== TRÁFEGO PAGO E ORGÂNICO ===== */
-app.post("/api/traffic/create-campaign", async (req, res) => {
-  const { userId, platform, campaignName, dailyBudget, targetAudience, creativeUrl } = req.body;
-  if (!userId || !platform || !dailyBudget) {
-    return res.status(400).json({ error: "Dados insuficientes para estruturar a campanha." });
-  }
-  console.log(`🚀 [Tráfego] Criando campanha ${campaignName || "sem nome"} no ${platform} — R$ ${dailyBudget}/dia`);
-  res.json({
-    success: true,
-    message: `Campanha de tráfego criada no ${platform}!`,
-    campaignId: "act_" + Math.floor(Math.random() * 10000000),
-  });
-});
-
-app.get("/api/traffic/analytics", (_req, res) => {
-  res.json({
-    impressions: Math.floor(Math.random() * 50000) + 5000,
-    clicks: Math.floor(Math.random() * 1200) + 150,
-    ctr: (Math.random() * 4 + 1).toFixed(2) + "%",
-    cpc: "R$ " + (Math.random() * 0.8 + 0.2).toFixed(2),
-  });
-});
-
-app.get("/api/agent/metrics", async (req, res) => {
-  try {
-    const userId = req.query.userId || "1";
-    let totalLeads = 12, convertedLeads = 4, estimatedRevenue = 1196.0;
-    try {
-      const totalRes = await query("SELECT COUNT(*) AS c FROM user_leads WHERE user_id = $1", [userId]);
-      const convRes = await query("SELECT COUNT(*) AS c FROM user_leads WHERE user_id = $1 AND status = 'convertido'", [userId]);
-      const revRes = await query("SELECT SUM(estimated_value) AS s FROM user_leads WHERE user_id = $1 AND status = 'convertido'", [userId]);
-      totalLeads = parseInt(totalRes.rows[0]?.c) || totalLeads;
-      convertedLeads = parseInt(convRes.rows[0]?.c) || convertedLeads;
-      estimatedRevenue = parseFloat(revRes.rows[0]?.s) || estimatedRevenue;
-    } catch {
-      /* usa fallback mock quando PG indisponível */
-    }
-    const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) + "%" : "0%";
-    res.json({ totalLeads, convertedLeads, conversionRate, estimatedRevenue: "R$ " + estimatedRevenue.toFixed(2) });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
-
-app.get('/dashboard', (_req, res) => {
-  res.redirect('/dashboard-agentes.html');
-});
 
 seedMaster().then(() => {
   seedAgentDiscoveries();
   startSecurityScanner();
-  initWhatsAppBot();
-  setInterval(processScheduledPosts, 60000);
   app.listen(PORT, () => console.log(`Athena IA rodando em https://localhost:${PORT}`));
 });
