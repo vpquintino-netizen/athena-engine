@@ -413,5 +413,5 @@ app.get("/health", (_req, res) => res.json({ status: "ok" }));
 seedMaster().then(() => {
   seedAgentDiscoveries();
   startSecurityScanner();
-  app.listen(PORT, () => console.log(`Athena IA rodando em http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`Athena IA rodando em https://localhost:${PORT}`));
 });
