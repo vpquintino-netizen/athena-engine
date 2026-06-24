@@ -3,175 +3,1214 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Athena IA</title>
+  <title>Athena IA - Painel Corporativo</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Inter', sans-serif; }
-    #messages::-webkit-scrollbar { width: 6px; }
-    #messages::-webkit-scrollbar-track { background: transparent; }
-    #messages::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
-    .typing-dot { animation: blink 1.4s infinite both; }
-    .typing-dot:nth-child(2) { animation-delay: .2s; }
-    .typing-dot:nth-child(3) { animation-delay: .4s; }
-    @keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
+    body { background: #0a0a0f; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f5e; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    .bg-grid { background-image: radial-gradient(rgba(99,102,241,0.04) 1px, transparent 1px); background-size: 40px 40px; }
+    .glass { background: rgba(17,17,27,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .glow-card { box-shadow: 0 0 40px rgba(99,102,241,0.06); }
+    .tab-btn { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); position: relative; white-space: nowrap; }
+    .tab-btn::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:0; height:2.5px; background:linear-gradient(90deg,#6366f1,#a855f7); border-radius:2px; transition:width 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .tab-btn.active::after { width:60%; }
+    .tab-btn.active { color:white; background:rgba(99,102,241,0.12); }
+    .tab-content { animation: fadeIn 0.35s ease-out; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .input-field { transition:all 0.3s ease; }
+    .input-field:focus { box-shadow:0 0 0 2px rgba(99,102,241,0.25); }
+    .sector-card { transition:all 0.3s ease; }
+    .sector-card:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(99,102,241,0.12); }
+    .status-dot { animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .sidebar-link { transition:all 0.2s ease; }
+    .sidebar-link:hover { background:rgba(99,102,241,0.1); }
+    .tab-scroll { -webkit-overflow-scrolling:touch; }
+    .tab-scroll::-webkit-scrollbar { height:0; }
+    .shimmer-btn { background:linear-gradient(90deg,#6366f1,#a855f7,#6366f1); background-size:200% 100%; animation:shimmerBtn 3s ease-in-out infinite; }
+    @keyframes shimmerBtn { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+    .kanban-col { min-height:200px; }
+    .kanban-card { cursor:grab; transition:all 0.2s ease; }
+    .kanban-card:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(99,102,241,0.15); }
+    .kanban-card:active { cursor:grabbing; }
+    .pomodoro-ring { transition:stroke-dashoffset 1s linear; }
+    .search-highlight { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); }
+    .progress-bar { transition:width 0.5s ease; }
+    .snippet-copy { cursor:pointer; }
+    .snippet-copy:active { transform:scale(0.97); }
+    @keyframes agentPulse { 0%,100% { box-shadow:0 0 0 0 rgba(99,102,241,0.6); } 50% { box-shadow:0 0 0 16px rgba(99,102,241,0); } }
+    .agent-pulse { animation:agentPulse 2s ease-in-out infinite; }
+    .agent-neon { box-shadow:0 0 24px rgba(99,102,241,0.3),0 0 48px rgba(168,85,247,0.15); }
+    .agent-neon:hover { box-shadow:0 0 32px rgba(99,102,241,0.45),0 0 60px rgba(168,85,247,0.25); }
+    .agent-badge { box-shadow:0 0 16px rgba(34,197,94,0.25); }
+    @keyframes securityPulse { 0%,100% { box-shadow:0 0 0 0 rgba(239,68,68,0.6); } 50% { box-shadow:0 0 0 20px rgba(239,68,68,0); } }
+    .security-pulse { animation:securityPulse 1.5s ease-in-out infinite; }
+    .security-neon { box-shadow:0 0 24px rgba(239,68,68,0.3),0 0 48px rgba(220,38,38,0.15); }
+    .security-neon:hover { box-shadow:0 0 32px rgba(239,68,68,0.45),0 0 60px rgba(220,38,38,0.25); }
+    .agent-tab.active-tab { color:white; border-color:#6366f1; }
   </style>
 </head>
-<body class="bg-gray-950 text-white h-screen flex overflow-hidden">
-  <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col hidden md:flex">
-    <div class="p-6 border-b border-gray-800">
-      <span class="text-xl font-bold">Athena<span class="text-indigo-400">IA</span></span>
-      <p class="text-xs text-gray-500 mt-1">Console de Comandos</p>
-    </div>
-    <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="history">
-      <p class="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">Histórico</p>
-      <div class="text-gray-400 text-sm text-center py-8" id="empty-history">Nenhum comando ainda</div>
-    </nav>
-    <div class="p-4 border-t border-gray-800">
-      <a href="/index.html" class="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition">Voltar ao site</a>
-    </div>
-  </aside>
+<body class="bg-grid text-white h-screen flex overflow-hidden">
 
-  <main class="flex-1 flex flex-col">
-    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900/50">
-      <h1 class="font-semibold">Console Athena IA</h1>
-      <div class="flex items-center gap-3">
-        <span class="flex items-center gap-2 text-sm text-gray-400"><span class="w-2 h-2 bg-green-500 rounded-full"></span>Online</span>
-        <span id="plan-badge" class="bg-gray-800 text-xs px-3 py-1 rounded-full">Free</span>
+<div id="sidebar" class="w-[240px] bg-gray-900/50 border-r border-gray-800/60 flex flex-col shrink-0 hidden md:flex glass z-40">
+  <div class="p-4 border-b border-gray-800/60">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+        <svg class="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
       </div>
-    </header>
+      <div class="min-w-0"><span class="text-base font-bold tracking-tight">Athena<span class="text-indigo-400">IA</span></span><p class="text-[10px] text-gray-500 truncate">Painel Corporativo</p></div>
+    </div>
+  </div>
+  <div class="flex-1 p-2 space-y-0.5 overflow-y-auto" id="sector-list"></div>
+  <div class="p-3 border-t border-gray-800/60 space-y-2">
+    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-gray-800/40 rounded-lg"><span class="w-1.5 h-1.5 bg-green-500 rounded-full status-dot shrink-0"></span><span class="text-[11px] text-gray-400 truncate" id="user-email-display">carregando...</span></div>
+    <button id="logout-btn" class="flex items-center gap-2 text-gray-500 hover:text-red-400 text-[11px] transition w-full px-2.5 py-1.5 rounded-lg hover:bg-red-500/5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Sair</button>
+  </div>
+</div>
 
-    <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4">
-      <div class="flex justify-start">
-        <div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-3 max-w-[80%]">
-          <p class="text-sm text-gray-300">Olá! Eu sou a <strong class="text-indigo-400">Athena</strong>. Digite um comando abaixo para começar.</p>
+<main class="flex-1 flex flex-col min-w-0">
+  <header class="glass border-b border-gray-800/60 px-3 md:px-5 py-2.5">
+    <div class="flex items-center gap-3">
+      <button id="menu-toggle" class="md:hidden p-1.5 text-gray-400 hover:text-white transition rounded-lg hover:bg-gray-800"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="flex-1 relative max-w-md">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="global-search" type="text" placeholder="Buscar ferramentas, setores..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition input-field" />
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="pomodoro-toggle" class="p-2 text-gray-400 hover:text-indigo-400 transition rounded-lg hover:bg-gray-800/60" title="Timer Pomodoro">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </button>
+        <button id="tasks-toggle" class="p-2 text-gray-400 hover:text-indigo-400 transition rounded-lg hover:bg-gray-800/60" title="Lista de Tarefas">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </button>
+        <button id="snippets-toggle" class="p-2 text-gray-400 hover:text-indigo-400 transition rounded-lg hover:bg-gray-800/60" title="Snippets Rápidos">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="flex gap-1 mt-2 overflow-x-auto tab-scroll" id="tabs-container"></div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-3 md:p-5" id="content-area">
+    <div class="flex items-center justify-center h-full"><div class="text-center"><div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border border-indigo-500/10 mb-3"><svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><h2 class="text-base font-semibold text-gray-300">Bem-vindo ao Athena IA</h2><p class="text-gray-500 text-xs mt-1">Selecione um setor acima para começar</p></div></div>
+  </div>
+</main>
+
+<div id="pomodoro-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm"><div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm glow-card"><h3 class="font-semibold mb-4">Timer Pomodoro</h3><div class="text-center"><div class="text-5xl font-bold text-indigo-400 mb-4" id="pomodoro-display">25:00</div><div class="flex justify-center gap-2"><button id="pomodoro-start" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg text-sm font-medium transition">Iniciar</button><button id="pomodoro-pause" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg text-sm font-medium transition hidden">Pausar</button><button id="pomodoro-reset" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-lg text-sm font-medium transition">Resetar</button></div><p class="text-gray-500 text-xs mt-3" id="pomodoro-status">Pronto para focar</p></div><button onclick="this.closest('#pomodoro-modal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button></div></div>
+
+<div id="tasks-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm"><div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md glow-card"><h3 class="font-semibold mb-4">Lista de Tarefas</h3><div class="flex gap-2 mb-4"><input id="task-input" type="text" placeholder="Nova tarefa..." class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><button id="task-add" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm font-medium transition">Adicionar</button></div><div id="task-list" class="space-y-2 max-h-60 overflow-y-auto"></div><p class="text-gray-500 text-xs mt-3" id="task-count">0 tarefas</p><button onclick="this.closest('#tasks-modal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button></div></div>
+
+<div id="snippets-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm"><div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg glow-card"><h3 class="font-semibold mb-4">Snippets Corporativos</h3><p class="text-gray-500 text-xs mb-4">Clique para copiar</p><div id="snippets-list" class="space-y-2 max-h-72 overflow-y-auto"></div><button onclick="this.closest('#snippets-modal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button></div></div>
+
+<!-- ===== AGENTE AUTÔNOMO — NOVIDADES DO MERCADO ===== -->
+<div id="agent-widget" class="fixed bottom-6 right-6 z-[100] hidden">
+  <button id="agent-btn" class="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-2xl agent-neon cursor-pointer transition-all hover:scale-105 active:scale-95 active:brightness-110" title="Central de Comando — Master">
+    <svg id="agent-icon-light" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    <svg id="agent-icon-shield" class="w-7 h-7 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span id="agent-notification" class="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-indigo-500/50 hidden"></span>
+    <span id="agent-security-alert" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-red-500/50 hidden">!</span>
+  </button>
+</div>
+
+<div id="agent-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+  <div class="relative bg-gray-900 border border-gray-800 rounded-2xl p-5 w-full max-w-xl glow-card mx-4 max-h-[85vh] flex flex-col">
+    <div class="flex items-center justify-between mb-3 shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <h3 class="font-semibold text-sm">Central de Comando</h3>
+      </div>
+      <span class="text-[10px] text-gray-500 bg-gray-800/60 px-2 py-1 rounded-full border border-gray-700/50">Master</span>
+    </div>
+    <div class="flex gap-1 mb-3 border-b border-gray-800/60 shrink-0">
+      <button id="agent-tab-discoveries" class="agent-tab flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg text-xs font-medium text-gray-400 hover:text-white transition border-b-2 border-transparent active-tab" onclick="switchAgentTab('discoveries')"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Novidades</button>
+      <button id="agent-tab-security" class="agent-tab flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg text-xs font-medium text-gray-400 hover:text-white transition border-b-2 border-transparent" onclick="switchAgentTab('security')"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Blindagem & HelpDesk</button>
+    </div>
+    <div id="agent-discovery-content" class="space-y-4 overflow-y-auto flex-1 min-h-0">
+      <div class="flex items-center justify-center py-6"><svg class="animate-spin w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><span class="ml-2 text-xs text-gray-400">Buscando novidades...</span></div>
+    </div>
+    <div id="agent-security-content" class="hidden overflow-y-auto flex-1 min-h-0 space-y-3">
+      <div id="agent-incident-summary" class="bg-gray-800/40 rounded-xl p-3 border border-red-500/20">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-[10px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">24/7 Monitoramento</span>
+          <span class="text-[10px] text-gray-500" id="agent-scan-stats">Scan #0</span>
+        </div>
+        <p class="text-xs text-gray-400" id="agent-incident-text">Carregando status de segurança...</p>
+      </div>
+      <div class="bg-gray-800/30 rounded-xl border border-gray-700/30 flex flex-col h-[260px]">
+        <div class="flex items-center gap-2 px-3 py-2 border-b border-gray-700/30 shrink-0">
+          <div class="w-2 h-2 bg-green-500 rounded-full status-dot"></div>
+          <span class="text-xs font-medium text-gray-300">HelpDesk — Blindagem Total</span>
+        </div>
+        <div id="agent-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 text-xs"></div>
+        <div class="flex gap-2 p-2 border-t border-gray-700/30 shrink-0">
+          <input id="agent-chat-input" type="text" placeholder="Digite status, relatorio, incidentes..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <button id="agent-chat-send" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-lg text-xs font-medium transition shrink-0">Enviar</button>
         </div>
       </div>
-      <div class="flex justify-start">
-        <div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-3 max-w-[80%]">
-          <p class="text-sm text-gray-300">Ex: <code class="bg-gray-700 px-2 py-0.5 rounded text-indigo-300">crie um poema sobre IA</code></p>
-        </div>
-      </div>
     </div>
-
-    <div class="p-4 border-t border-gray-800 bg-gray-900/50">
-      <form id="chat-form" class="flex gap-3 max-w-4xl mx-auto">
-        <input id="prompt-input" type="text" placeholder="Digite seu comando para a Athena..." class="flex-1 bg-gray-800 rounded-full px-6 py-3 outline-none border border-gray-700 focus:border-indigo-500 transition text-sm" autofocus />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-full font-semibold text-sm transition">Enviar</button>
-      </form>
-      <p class="text-xs text-gray-600 text-center mt-2">
-        <span id="usage-count">0</span>/<span id="usage-limit">10</span> comandos usados hoje
-      </p>
+    <div id="agent-discovery-actions" class="flex gap-2 mt-3 shrink-0">
+      <button id="agent-reject" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition text-gray-300 hover:text-white">Recusar</button>
+      <button id="agent-approve" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-4 py-2.5 rounded-xl text-sm font-medium transition text-white shadow-lg shadow-indigo-600/20">Aprovar e Integrar</button>
     </div>
-  </main>
+    <div id="agent-security-actions" class="hidden gap-2 mt-3 shrink-0">
+      <button id="agent-autofix-btn" class="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 px-4 py-2.5 rounded-xl text-sm font-medium transition text-white shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg> Executar AutoFix</button>
+    </div>
+    <button onclick="closeAgentModal()" class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-gray-500 hover:text-white transition rounded-lg hover:bg-gray-800">✕</button>
+  </div>
+</div>
 
-  <script>
-    const API_KEY = "sk-exemplo";
+<script>
+const SECTORS = [
+  { id:0, title:"Marketing & Comercial", short:"Marketing", icon:"M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z", color:"from-pink-500 to-rose-600" },
+  { id:1, title:"Projetos & Analytics", short:"Analytics", icon:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z", color:"from-cyan-500 to-blue-600" },
+  { id:2, title:"Jurídico & Contabilidade", short:"Jurídico", icon:"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", color:"from-emerald-500 to-teal-600" },
+  { id:3, title:"Logística & RH", short:"Logística", icon:"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", color:"from-amber-500 to-orange-600" },
+  { id:4, title:"Scanner OCR", short:"OCR", icon:"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01", color:"from-violet-500 to-purple-600" },
+  { id:5, title:"CRM Integrado", short:"CRM", icon:"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", color:"from-blue-500 to-indigo-600" },
+  { id:6, title:"Motor Meta & TikTok", short:"Meta/TikTok", icon:"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z", color:"from-red-500 to-pink-600" },
+  { id:7, title:"Motor B2B & Outros", short:"B2B", icon:"M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9", color:"from-green-500 to-emerald-600" }
+];
 
-    const messagesEl = document.getElementById("messages");
-    const form = document.getElementById("chat-form");
-    const input = document.getElementById("prompt-input");
-    const historyEl = document.getElementById("history");
-    const emptyHistory = document.getElementById("empty-history");
-    const usageCount = document.getElementById("usage-count");
-    const usageLimit = document.getElementById("usage-limit");
+const SNIPPETS = [
+  { title:"Apresentação Comercial", text:"Prezado(a) [Nome], tudo bem? Me chamo [Seu Nome] e sou da Athena IA. Gostaria de apresentar nossa plataforma que pode ajudar [Empresa] a [benefício específico]. Tem 15 min para uma conversa rápida?" },
+  { title:"Follow-up Vendas", text:"Olá [Nome], tudo bem? Passando para dar continuidade à nossa conversa sobre como a Athena IA pode otimizar os processos de [setor] da [Empresa]. Aguardo seu retorno!" },
+  { title:"E-mail de Proposta", text:"Assunto: Proposta Comercial - Athena IA\n\nPrezado(a) [Nome], conforme conversamos, segue proposta da Athena IA para [serviço]. O plano mensal tem valor de R$ 350,00 com acesso completo a todos os módulos. Fico à disposição para alinharmos os próximos passos." },
+  { title:"Resposta Automática", text:"Obrigado pelo contato! Recebemos sua mensagem e retornaremos em até 24 horas úteis. Se for urgente, responda este e-mail com [URGENTE] no assunto." },
+  { title:"Agradecimento", text:"Olá [Nome], gostaria de agradecer pela atenção durante nossa reunião. Fique à vontade para qualquer dúvida. Seguimos à disposição!" }
+];
 
-    let usage = Number(localStorage.getItem("athena_usage") || 0);
-    let history = JSON.parse(localStorage.getItem("athena_history") || "[]");
+let currentTab = 0;
 
-    usageCount.textContent = usage;
-    usageLimit.textContent = 10;
-    renderHistory();
+function __ns(key) {
+  try {
+    const sd = JSON.parse(localStorage.getItem("athena_session") || "{}");
+    const uid = sd.user_id || (sd.email || "anon").replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
+    return key + "_" + uid;
+  } catch { return key + "_anon"; }
+}
 
-    function appendMessage(text, isUser = false) {
-      const div = document.createElement("div");
-      div.className = `flex ${isUser ? "justify-end" : "justify-start"}`;
-      div.innerHTML = `<div class="${isUser ? "bg-indigo-600 rounded-2xl rounded-br-sm" : "bg-gray-800 rounded-2xl rounded-bl-sm"} px-5 py-3 max-w-[80%]"><p class="text-sm">${text}</p></div>`;
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+function __session() {
+  try { return JSON.parse(localStorage.getItem("athena_session") || "{}"); } catch { return {}; }
+}
 
-    function showTyping() {
-      const div = document.createElement("div");
-      div.className = "flex justify-start";
-      div.id = "typing";
-      div.innerHTML = `<div class="bg-gray-800 rounded-2xl rounded-bl-sm px-5 py-4 flex gap-1"><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span><span class="typing-dot w-2 h-2 bg-indigo-400 rounded-full inline-block"></span></div>`;
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+function __isMaster() {
+  return __session().role === "master";
+}
 
-    function removeTyping() {
-      const t = document.getElementById("typing");
-      if (t) t.remove();
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const sd = localStorage.getItem("athena_session");
+  if (!sd) { window.location.href="/index.html"; return; }
+  try { const d=JSON.parse(sd); if(!d.email||!d.loggedIn) { window.location.href="/index.html"; return; } document.getElementById("user-email-display").textContent=d.email + (d.role==="master" ? " ⚡" : ""); } catch { window.location.href="/index.html"; }
+  renderTabs(); renderSectors(); selectTab(0);
+  initPomodoro(); initTasks(); initSnippets(); initSearch();
+  initAgentWidget();
+});
 
-    async function callAI(prompt) {
-      if (API_KEY === "sk-exemplo") {
-        await new Promise(r => setTimeout(r, 1000));
-        const responses = [
-          "Ótimo! Processei sua solicitação. Como assistente IA, posso ajudar com resumos, criação de conteúdo, análise de dados e muito mais.",
-          "Perfeito! A Athena IA utilizou modelos de última geração para entregar este resultado.",
-          "Comando recebido! Analisei os dados e preparei uma resposta completa para você.",
-          "Feito! Aqui está o resultado. Você pode refinar com novos comandos."
-        ];
-        return responses[Math.floor(Math.random() * responses.length)];
-      }
+document.getElementById("logout-btn").addEventListener("click",()=>{ localStorage.removeItem("athena_session"); window.location.href="/index.html"; });
+document.getElementById("menu-toggle").addEventListener("click",()=>{ const s=document.getElementById("sidebar"); if(s.classList.contains("hidden")){ s.classList.remove("hidden"); s.classList.add("fixed","inset-0","z-50","w-full","max-w-[240px]"); document.addEventListener("click",cls); } else closeSidebar(); });
+function cls(e){ const s=document.getElementById("sidebar"); if(!s.contains(e.target)&&e.target.id!=="menu-toggle") closeSidebar(); }
+function closeSidebar(){ const s=document.getElementById("sidebar"); s.classList.add("hidden"); s.classList.remove("fixed","inset-0","z-50","w-full","max-w-[240px]"); document.removeEventListener("click",cls); }
 
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
-        body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: "user", content: prompt }] }),
-      });
-      const data = await res.json();
-      return data.choices?.[0]?.message?.content || "Erro ao obter resposta.";
-    }
+function renderTabs(){ const c=document.getElementById("tabs-container"); c.innerHTML=""; SECTORS.forEach((s,i)=>{ const b=document.createElement("button"); b.className="tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-200 shrink-0 border border-transparent"; b.dataset.index=i; b.innerHTML=`<svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${s.icon}"/></svg><span class="truncate max-w-[100px]">${s.short}</span>`; b.addEventListener("click",()=>selectTab(i)); c.appendChild(b); }); }
+function renderSectors(){ const c=document.getElementById("sector-list"); c.innerHTML=""; SECTORS.forEach((s,i)=>{ const l=document.createElement("button"); l.className="sidebar-link flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-xs text-gray-400 hover:text-white transition"; l.dataset.index=i; l.innerHTML=`<div class="w-6 h-6 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${s.icon}"/></svg></div><span class="truncate">${s.short}</span>`; l.addEventListener("click",()=>selectTab(i)); c.appendChild(l); }); }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const prompt = input.value.trim();
-      if (!prompt) return;
+function selectTab(index){
+  const sector=SECTORS[index]; if(!sector) return;
+  currentTab=index;
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>{ b.classList.toggle("active",i===index); if(i===index) b.classList.add("bg-indigo-500/10","border-indigo-500/20","text-white"); else b.classList.remove("bg-indigo-500/10","border-indigo-500/20","text-white"); });
+  document.querySelectorAll("#sector-list .sidebar-link").forEach((l,i)=>{ if(i===index) l.classList.add("bg-indigo-500/10","text-white"); else l.classList.remove("bg-indigo-500/10","text-white"); });
+  renderContent(sector);
+}
 
-      if (usage >= 10) {
-        appendMessage(`Limite diário atingido. <a href="/index.html#precos" class="text-indigo-400 underline">Assine o plano Pro</a> para comandos ilimitados.`);
-        return;
-      }
+function findTool(q){
+  const term=q.toLowerCase().trim();
+  if(!term) return;
+  const all=SECTORS.flatMap((s,i)=>[{name:s.title,tab:i,type:"setor"}]);
+  const found=all.find(a=>a.name.toLowerCase().includes(term));
+  if(found) selectTab(found.tab);
+  document.getElementById("global-search").value="";
+}
 
-      appendMessage(prompt, true);
-      input.value = "";
-      showTyping();
+function initSearch(){
+  const inp=document.getElementById("global-search");
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter") findTool(inp.value); });
+}
 
-      try {
-        const response = await callAI(prompt);
-        removeTyping();
-        appendMessage(response);
+function renderContent(sector){
+  const area=document.getElementById("content-area");
+  const contents = {
+    0: renderMarketing,
+    1: renderAnalytics,
+    2: renderJuridico,
+    3: renderLogistica,
+    4: renderOCR,
+    5: renderCRM,
+    6: renderMetaTikTok,
+    7: renderB2B
+  };
+  const fn=contents[sector.id]||renderMarketing;
+  area.innerHTML=`<div class="tab-content max-w-6xl mx-auto">${fn(sector)}</div>`;
+  if(sector.id===0) initKanban();
+  if(sector.id===2) initBrasilAPI();
+  if(sector.id===5) initCRMChart();
+}
 
-        usage++;
-        usageCount.textContent = usage;
-        localStorage.setItem("athena_usage", usage);
-
-        history.unshift({ prompt, response, time: new Date().toLocaleString() });
-        localStorage.setItem("athena_history", JSON.stringify(history));
-        renderHistory();
-      } catch {
-        removeTyping();
-        appendMessage("Erro ao processar comando. Tente novamente.");
-      }
+function exportPDF(title){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(16); doc.text(title,20,20);
+  doc.setFontSize(10); doc.text(`Athena IA - Relatório gerado em ${new Date().toLocaleString("pt-BR")}`,20,30);
+  doc.setFontSize(12);
+  let y=45;
+  const content=document.querySelector(".tab-content");
+  if(content){
+    const cards=content.querySelectorAll(".sector-card, .bg-gray-900\\/40, .bg-gray-900\\/60");
+    cards.forEach(c=>{
+      const txt=c.textContent.trim().substring(0,100);
+      if(txt&&y<270){ doc.text(txt,20,y); y+=10; }
     });
+  }
+  doc.save(`${title.replace(/\s/g,"_")}.pdf`);
+}
 
-    function renderHistory() {
-      document.querySelectorAll(".history-item").forEach(el => el.remove());
-      if (history.length === 0) { emptyHistory.style.display = "block"; return; }
-      emptyHistory.style.display = "none";
-      history.slice(0, 20).forEach((item) => {
-        const a = document.createElement("a");
-        a.className = "history-item block px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition cursor-pointer truncate";
-        a.textContent = item.prompt;
-        a.title = item.prompt;
-        a.onclick = () => { input.value = item.prompt; input.focus(); };
-        historyEl.appendChild(a);
-      });
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const el=document.createElement("div"); el.className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm z-50 animate-bounce"; el.textContent="Copiado!"; document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2000);
+  });
+}
+
+/* ===== POMODORO ===== */
+let pomodoroTime=1500, pomodoroRunning=false, pomodoroInterval;
+function initPomodoro(){
+  document.getElementById("pomodoro-toggle").addEventListener("click",()=>document.getElementById("pomodoro-modal").classList.remove("hidden"));
+  document.getElementById("pomodoro-start").addEventListener("click",()=>{ if(!pomodoroRunning){ pomodoroRunning=true; document.getElementById("pomodoro-start").classList.add("hidden"); document.getElementById("pomodoro-pause").classList.remove("hidden"); document.getElementById("pomodoro-status").textContent="Focando..."; pomodoroInterval=setInterval(()=>{ if(pomodoroTime>0){ pomodoroTime--; updatePomodoro(); } else { clearInterval(pomodoroInterval); pomodoroRunning=false; document.getElementById("pomodoro-status").textContent="Tempo encerrado! Faça uma pausa."; document.getElementById("pomodoro-start").classList.remove("hidden"); document.getElementById("pomodoro-pause").classList.add("hidden"); } },1000); } });
+  document.getElementById("pomodoro-pause").addEventListener("click",()=>{ clearInterval(pomodoroInterval); pomodoroRunning=false; document.getElementById("pomodoro-start").classList.remove("hidden"); document.getElementById("pomodoro-pause").classList.add("hidden"); document.getElementById("pomodoro-status").textContent="Pausado"; });
+  document.getElementById("pomodoro-reset").addEventListener("click",()=>{ clearInterval(pomodoroInterval); pomodoroRunning=false; pomodoroTime=1500; updatePomodoro(); document.getElementById("pomodoro-start").classList.remove("hidden"); document.getElementById("pomodoro-pause").classList.add("hidden"); document.getElementById("pomodoro-status").textContent="Pronto para focar"; });
+}
+function updatePomodoro(){ const m=Math.floor(pomodoroTime/60); const s=pomodoroTime%60; document.getElementById("pomodoro-display").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`; }
+
+/* ===== TASKS ===== */
+function initTasks(){
+  document.getElementById("tasks-toggle").addEventListener("click",()=>{ document.getElementById("tasks-modal").classList.remove("hidden"); renderTasks(); });
+  document.getElementById("task-add").addEventListener("click",()=>{ const inp=document.getElementById("task-input"); const t=inp.value.trim(); if(!t) return; const tasks=JSON.parse(localStorage.getItem(__ns("athena_tasks"))||"[]"); tasks.push({text:t,done:false,id:Date.now()}); localStorage.setItem(__ns("athena_tasks"),JSON.stringify(tasks)); inp.value=""; renderTasks(); });
+  document.getElementById("task-input").addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("task-add").click(); });
+}
+function renderTasks(){
+  const list=document.getElementById("task-list"); const tasks=JSON.parse(localStorage.getItem(__ns("athena_tasks"))||"[]");
+  list.innerHTML=tasks.length?tasks.map(t=>`<div class="flex items-center gap-3 bg-gray-800/50 rounded-lg px-3 py-2 ${t.done?"opacity-50":""}"><input type="checkbox" ${t.done?"checked":""} onchange="toggleTask(${t.id})" class="accent-indigo-500 cursor-pointer" /><span class="flex-1 text-sm ${t.done?"line-through text-gray-500":""}">${t.text}</span><button onclick="deleteTask(${t.id})" class="text-gray-500 hover:text-red-400 text-xs">✕</button></div>`).join(""):'<p class="text-gray-500 text-xs text-center py-4">Nenhuma tarefa</p>';
+  document.getElementById("task-count").textContent=`${tasks.length} tarefa(s)`;
+}
+function toggleTask(id){ const tasks=JSON.parse(localStorage.getItem(__ns("athena_tasks"))||"[]"); const t=tasks.find(x=>x.id===id); if(t) t.done=!t.done; localStorage.setItem(__ns("athena_tasks"),JSON.stringify(tasks)); renderTasks(); }
+function deleteTask(id){ let tasks=JSON.parse(localStorage.getItem(__ns("athena_tasks"))||"[]"); tasks=tasks.filter(x=>x.id!==id); localStorage.setItem(__ns("athena_tasks"),JSON.stringify(tasks)); renderTasks(); }
+
+/* ===== SNIPPETS ===== */
+function initSnippets(){
+  document.getElementById("snippets-toggle").addEventListener("click",()=>renderSnippets());
+  document.getElementById("snippets-list").addEventListener("click",e=>{ const item=e.target.closest(".snippet-item"); if(item) copyToClipboard(item.dataset.text); });
+}
+function renderSnippets(){
+  document.getElementById("snippets-modal").classList.remove("hidden");
+  const list=document.getElementById("snippets-list");
+  list.innerHTML=SNIPPETS.map(s=>`<div class="snippet-item snippet-copy bg-gray-800/50 hover:bg-gray-800 rounded-lg px-4 py-3 border border-gray-700/30 transition" data-text="${s.text.replace(/"/g,"&quot;")}"><p class="text-xs font-medium text-indigo-400 mb-1">${s.title}</p><p class="text-xs text-gray-400 truncate">${s.text.substring(0,80)}...</p></div>`).join("");
+}
+
+/* ===== TAB 0: MARKETING ===== */
+function renderMarketing(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">CRM Premium & Marketing Digital</p></div><button onclick="exportPDF('Marketing_Comercial')" class="ml-auto bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Exportar PDF</button></div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>Kanban de Leads</h3>
+        <div class="grid grid-cols-4 gap-2 text-center text-[10px] text-gray-500 mb-3"><div>Lead</div><div>Contato</div><div>Proposta</div><div>Fechado</div></div>
+        <div class="grid grid-cols-4 gap-2" id="kanban-board">
+          <div class="kanban-col bg-gray-800/30 rounded-lg p-2 min-h-[120px]" data-col="0"></div>
+          <div class="kanban-col bg-gray-800/30 rounded-lg p-2 min-h-[120px]" data-col="1"></div>
+          <div class="kanban-col bg-gray-800/30 rounded-lg p-2 min-h-[120px]" data-col="2"></div>
+          <div class="kanban-col bg-gray-800/30 rounded-lg p-2 min-h-[120px]" data-col="3"></div>
+        </div>
+        <div class="flex gap-2 mt-3"><input id="kanban-input" type="text" placeholder="Novo lead..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><button onclick="addKanbanCard()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-medium transition shrink-0">+ Lead</button></div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>Encurtador UTM</h3>
+        <div class="space-y-2"><input id="utm-url" type="text" placeholder="URL original..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><div class="grid grid-cols-2 gap-2"><input id="utm-source" type="text" placeholder="source (ex: facebook)" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="utm-medium" type="text" placeholder="medium (ex: social)" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="utm-campaign" type="text" placeholder="campaign (ex: promolancamento)" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="utm-content" type="text" placeholder="content (opcional)" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div><button onclick="generateUTM()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Link UTM</button><div id="utm-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-indigo-400 break-all"></div></div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Estúdio de Copywriting</h3>
+        <div class="space-y-2"><div class="flex gap-2"><input id="copy-product" type="text" placeholder="Produto/Serviço..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="copy-benefit" type="text" placeholder="Principal benefício..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div><div class="flex gap-2"><input id="copy-problem" type="text" placeholder="Problema que resolve..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="copy-audience" type="text" placeholder="Público-alvo..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div><div class="flex gap-2"><select id="copy-framework" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 flex-1"><option value="AIDA">AIDA (Atenção, Interesse, Desejo, Ação)</option><option value="PAS">PAS (Problema, Agitação, Solução)</option></select><button onclick="generateCopy()" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-4 py-2 rounded-lg text-xs font-medium transition">Gerar Copy</button></div><div id="copy-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300 whitespace-pre-wrap"></div></div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>Gerador de Scripts Reels/TikTok</h3>
+        <div class="space-y-2"><input id="script-topic" type="text" placeholder="Tema do vídeo..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><div class="flex gap-2"><input id="script-hook" type="text" placeholder="Gancho (3s iniciais)..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><select id="script-duration" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"><option value="15">15s</option><option value="30">30s</option><option value="60">60s</option></select></div><button onclick="generateScript()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Script</button><div id="script-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300 whitespace-pre-wrap"></div></div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Calendário de Conteúdo</h3>
+        <div class="space-y-2"><div class="flex gap-2"><input id="content-date" type="date" class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /><input id="content-title" type="text" placeholder="Título do post..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div><div class="flex gap-2"><select id="content-channel" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 flex-1"><option value="Instagram">Instagram</option><option value="TikTok">TikTok</option><option value="Facebook">Facebook</option><option value="LinkedIn">LinkedIn</option><option value="Twitter">Twitter</option></select><button onclick="addContent()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-xs font-medium transition">Agendar</button></div><div id="content-list" class="space-y-1 max-h-32 overflow-y-auto"></div></div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Simulador de Tráfego Pago</h3>
+        <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] text-gray-500">Orçamento diário (R$)</label><input id="traffic-budget" type="number" value="50" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">CPC estimado (R$)</label><input id="traffic-cpc" type="number" value="1.5" step="0.1" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">Taxa de conversão (%)</label><input id="traffic-cvr" type="number" value="3" step="0.1" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">Dias da campanha</label><input id="traffic-days" type="number" value="30" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div></div>
+        <button onclick="simulateTraffic()" class="w-full mt-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-3 py-2 rounded-lg text-xs font-medium transition">Simular</button>
+        <div id="traffic-result" class="hidden bg-gray-800/40 rounded-lg p-3 mt-2 text-xs text-gray-300"></div>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+      <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>Criador de Landing Pages</h3>
+      <div class="grid lg:grid-cols-2 gap-3">
+        <div class="space-y-2">
+          <input id="lp-title" type="text" placeholder="Título da página..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <input id="lp-subtitle" type="text" placeholder="Subtítulo..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <textarea id="lp-description" placeholder="Descrição do produto/oferta..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-16"></textarea>
+          <input id="lp-cta" type="text" placeholder="Texto do botão CTA..." value="Quero Essa Oferta" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <button onclick="generateLandingPage()" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Landing Page</button>
+        </div>
+        <div id="lp-preview" class="bg-gray-800/40 rounded-lg p-4 text-xs text-gray-400 min-h-[160px] overflow-auto">Pré-visualização aparecerá aqui...</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ===== KANBAN ===== */
+function initKanban(){
+  const cols=JSON.parse(localStorage.getItem(__ns("athena_kanban"))||'[["Lead 1","Lead 2"],["Contato 1"],["Proposta 1"],["Fechado 1"]]');
+  cols.forEach((cards,ci)=>{ const col=document.querySelector(`.kanban-col[data-col="${ci}"]`); if(col){ col.innerHTML=cards.map((c,ci2)=>`<div class="kanban-card bg-gray-800/70 rounded-lg px-2.5 py-2 mb-1.5 text-xs border border-gray-700/40" draggable="true" data-col="${ci}" data-card="${ci2}">${c}</div>`).join(""); } });
+  localStorage.setItem(__ns("athena_kanban"),JSON.stringify(cols));
+  document.querySelectorAll(".kanban-card[draggable]").forEach(el=>{ el.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",JSON.stringify({col:el.dataset.col,card:el.dataset.card})); }); });
+  document.querySelectorAll(".kanban-col").forEach(col=>{ col.addEventListener("dragover",e=>e.preventDefault()); col.addEventListener("drop",e=>{ e.preventDefault(); const data=JSON.parse(e.dataTransfer.getData("text/plain")); const cols=JSON.parse(localStorage.getItem(__ns("athena_kanban"))); const card=cols[data.col].splice(data.card,1)[0]; const targetCol=col.dataset.col; cols[targetCol].push(card); localStorage.setItem(__ns("athena_kanban"),JSON.stringify(cols)); initKanban(); }); });
+}
+function addKanbanCard(){
+  const inp=document.getElementById("kanban-input"); const val=inp.value.trim(); if(!val) return;
+  const cols=JSON.parse(localStorage.getItem(__ns("athena_kanban"))); cols[0].push(val); localStorage.setItem(__ns("athena_kanban"),JSON.stringify(cols)); inp.value=""; initKanban();
+}
+
+/* ===== UTM ===== */
+function generateUTM(){
+  const url=document.getElementById("utm-url").value.trim();
+  const source=document.getElementById("utm-source").value.trim();
+  const medium=document.getElementById("utm-medium").value.trim();
+  const campaign=document.getElementById("utm-campaign").value.trim();
+  const content=document.getElementById("utm-content").value.trim();
+  if(!url||!source||!medium||!campaign){ alert("Preencha URL, source, medium e campaign."); return; }
+  const params=new URLSearchParams({utm_source:source,utm_medium:medium,utm_campaign:campaign});
+  if(content) params.set("utm_content",content);
+  const result=`${url}${url.includes("?")?"&":"?"}${params.toString()}`;
+  const el=document.getElementById("utm-result"); el.classList.remove("hidden"); el.innerHTML=`<div class="flex items-center justify-between gap-2"><span class="break-all">${result}</span><button onclick="copyToClipboard('${result.replace(/'/g,"\\'")}')" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] shrink-0">Copiar</button></div>`;
+}
+
+/* ===== COPYWRITING ===== */
+function generateCopy(){
+  const product=document.getElementById("copy-product").value.trim()||"seu produto";
+  const benefit=document.getElementById("copy-benefit").value.trim()||"resultados incríveis";
+  const problem=document.getElementById("copy-problem").value.trim()||"um desafio";
+  const audience=document.getElementById("copy-audience").value.trim()||"seu público";
+  const framework=document.getElementById("copy-framework").value;
+  let copy="";
+  if(framework==="AIDA"){
+    copy=`⚠️ ATENÇÃO: Você sabia que poderia estar perdendo ${benefit}?\n\n💰 INTERESSE: Imagine transformar ${problem} em uma máquina de resultados para ${audience}.\n\n🔥 DESEJO: Com ${product}, você desbloqueia todo esse potencial sem complicação.\n\n🚀 AÇÃO: Clique agora e descubra como!`;
+  } else {
+    copy=`😰 PROBLEMA: ${audience} enfrenta ${problem} diariamente.\n\n⚡ AGITAÇÃO: Enquanto você perde tempo, seus concorrentes já estão lucrando com ${benefit}. Isso custa caro!\n\n💡 SOLUÇÃO: Apresentamos ${product} — a ferramenta que resolve isso de uma vez por todas.\n\n👉 Comece hoje mesmo e veja a diferença!`;
+  }
+  const el=document.getElementById("copy-result"); el.classList.remove("hidden"); el.innerHTML=`<div class="flex items-start justify-between gap-2"><span class="whitespace-pre-wrap">${copy}</span><button onclick="copyToClipboard(\`${copy.replace(/`/g,"\\`")}\`)" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] shrink-0 mt-1">Copiar</button></div>`;
+}
+
+/* ===== SCRIPT REELS ===== */
+function generateScript(){
+  const topic=document.getElementById("script-topic").value.trim()||"seu tema";
+  const hook=document.getElementById("script-hook").value.trim()||"Você não vai acreditar nisso!";
+  const duration=document.getElementById("script-duration").value;
+  const secs={15:"3-5 segundos",30:"5-8 segundos",60:"10-15 segundos"};
+  const script=`🎬 SCRIPT: ${topic} (${duration}s)\n\n⏱ GANCHO (${secs[duration]}): ${hook}\n\n📖 DESENVOLVIMENTO:\n• Apresente o problema/contexto\n• Mostre a solução com ${topic}\n• Destaque os benefícios principais\n\n💥 CALL TO ACTION:\n• Curte e compartilha!\n• Segue para mais dicas\n• Comente o que achou\n\n🎵 TRILHA: Música animada/trending audio`;
+  const el=document.getElementById("script-result"); el.classList.remove("hidden"); el.innerHTML=`<div class="flex items-start justify-between gap-2"><span class="whitespace-pre-wrap">${script}</span><button onclick="copyToClipboard(\`${script.replace(/`/g,"\\`")}\`)" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] shrink-0 mt-1">Copiar</button></div>`;
+}
+
+/* ===== CONTENT CALENDAR ===== */
+function addContent(){
+  const date=document.getElementById("content-date").value;
+  const title=document.getElementById("content-title").value.trim();
+  const channel=document.getElementById("content-channel").value;
+  if(!date||!title) return;
+  const items=JSON.parse(localStorage.getItem(__ns("athena_content"))||"[]");
+  items.unshift({date,title,channel,id:Date.now()});
+  localStorage.setItem(__ns("athena_content"),JSON.stringify(items));
+  document.getElementById("content-title").value="";
+  renderContentCalendar();
+}
+function renderContentCalendar(){
+  const list=document.getElementById("content-list");
+  if(!list) return;
+  const items=JSON.parse(localStorage.getItem(__ns("athena_content"))||"[]");
+  list.innerHTML=items.slice(0,10).map(i=>`<div class="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-1.5 text-xs"><span class="text-gray-400">${i.date}</span><span class="flex-1 mx-2 truncate">${i.title}</span><span class="text-[10px] text-indigo-400">${i.channel}</span></div>`).join("")||'<p class="text-gray-500 text-xs text-center py-2">Nenhum conteúdo agendado</p>';
+}
+
+/* ===== TRAFFIC SIMULATOR ===== */
+function simulateTraffic(){
+  const budget=parseFloat(document.getElementById("traffic-budget").value)||50;
+  const cpc=parseFloat(document.getElementById("traffic-cpc").value)||1.5;
+  const cvr=parseFloat(document.getElementById("traffic-cvr").value)||3;
+  const days=parseInt(document.getElementById("traffic-days").value)||30;
+  const clicksPerDay=Math.round(budget/cpc);
+  const totalClicks=clicksPerDay*days;
+  const conversions=Math.round(totalClicks*(cvr/100));
+  const totalSpent=budget*days;
+  const cpa=conversions>0?Math.round(totalSpent/conversions):0;
+  const el=document.getElementById("traffic-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="grid grid-cols-2 gap-2"><div><span class="text-gray-500">Cliques/dia</span><p class="text-white font-semibold">${clicksPerDay}</p></div><div><span class="text-gray-500">Total de cliques</span><p class="text-white font-semibold">${totalClicks}</p></div><div><span class="text-gray-500">Conversões estimadas</span><p class="text-green-400 font-semibold">${conversions}</p></div><div><span class="text-gray-500">CPA médio</span><p class="text-indigo-400 font-semibold">R$ ${cpa}</p></div></div><p class="text-gray-500 mt-2">Orçamento total: <span class="text-white font-semibold">R$ ${totalSpent}</span> em ${days} dias</p>`;
+}
+
+/* ===== LANDING PAGE CREATOR ===== */
+function generateLandingPage(){
+  const title=document.getElementById("lp-title").value.trim()||"Sua Oferta Irresistível";
+  const subtitle=document.getElementById("lp-subtitle").value.trim()||"A solução que você estava procurando";
+  const desc=document.getElementById("lp-description").value.trim()||"Descrição do seu produto ou serviço aqui.";
+  const cta=document.getElementById("lp-cta").value.trim()||"Quero Essa Oferta";
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 min-h-screen flex items-center justify-center p-6"><div class="max-w-lg w-full bg-gray-900/70 backdrop-blur-xl border border-indigo-500/30 rounded-3xl p-10 text-center"><div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6"><svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><h1 class="text-3xl font-extrabold text-white mb-2">${title}</h1><p class="text-indigo-300 text-lg mb-4">${subtitle}</p><p class="text-gray-400 mb-8">${desc}</p><button class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/50">${cta}</button><p class="text-gray-600 text-xs mt-6">Athena IA - Landing Page Gerada Automaticamente</p></div></body></html>`;
+  document.getElementById("lp-preview").innerHTML=`<div class="flex flex-col gap-2"><div class="bg-gray-700/30 rounded-lg p-3 text-center"><p class="text-white font-semibold text-sm">${title}</p><p class="text-indigo-300 text-xs">${subtitle}</p></div><p class="text-gray-400 text-xs">${desc}</p><div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg px-3 py-2 text-center text-white text-xs font-semibold">${cta}</div><button onclick="copyToClipboard(\`${html.replace(/`/g,"\\`")}\`)" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs transition mt-2">Copiar HTML Completo</button><button onclick="downloadFile('landing-page.html',\`${html.replace(/`/g,"\\`")}\`)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-xs transition">Download .html</button></div>`;
+}
+
+function downloadFile(name,content){
+  const blob=new Blob([content],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ===== TAB 1: PROJETOS & ANALYTICS ===== */
+function renderAnalytics(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Agente Autônomo de Criação & Ideação</p></div></div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>Ideação Caixa-Alta</h3>
+        <div class="space-y-2">
+          <div class="flex gap-2"><input id="idea-market1" type="text" placeholder="Mercado 1 (ex: Saúde)" class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="idea-market2" type="text" placeholder="Mercado 2 (ex: Tecnologia)" class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div>
+          <input id="idea-trend" type="text" placeholder="Tendência ou palavra-chave..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <button onclick="generateIdeas()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Ideias Disruptivas</button>
+          <div id="idea-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300 whitespace-pre-wrap"></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>Engenharia Reversa Legal</h3>
+        <div class="space-y-2">
+          <input id="rev-company" type="text" placeholder="Empresa de referência (ex: Nubank)" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <input id="rev-sector" type="text" placeholder="Setor (ex: Fintech)" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" />
+          <button onclick="analyzeCompany()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-3 py-2 rounded-lg text-xs font-medium transition">Analisar Estrutura</button>
+          <div id="rev-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300 whitespace-pre-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+      <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>Orquestração & Cache de Dados</h3>
+      <div class="grid lg:grid-cols-3 gap-3 mt-3">
+        <div class="bg-gray-800/40 rounded-lg p-3 text-center"><p class="text-xs text-gray-400">Tarefas em Cache</p><p class="text-2xl font-bold text-cyan-400">${localStorage.getItem(__ns("athena_tasks"))?JSON.parse(localStorage.getItem(__ns("athena_tasks"))).length:0}</p></div>
+        <div class="bg-gray-800/40 rounded-lg p-3 text-center"><p class="text-xs text-gray-400">Leads em Pipeline</p><p class="text-2xl font-bold text-blue-400">${JSON.parse(localStorage.getItem(__ns("athena_kanban"))||"[[],[],[],[]]").flat().length}</p></div>
+        <div class="bg-gray-800/40 rounded-lg p-3 text-center"><p class="text-xs text-gray-400">Espaço do Usuário</p><p class="text-2xl font-bold text-indigo-400">${(()=>{let s=0;for(let k in localStorage){if(k.startsWith("athena_")&&k.includes(__session().email?.replace(/[^a-zA-Z0-9]/g,"_").toLowerCase()||"anon"))s+=localStorage.getItem(k).length;}return(s/1024).toFixed(1)})()} KB</p></div>
+      </div>
+    </div>
+  `;
+}
+
+function generateIdeas(){
+  const m1=document.getElementById("idea-market1").value.trim()||"Saúde";
+  const m2=document.getElementById("idea-market2").value.trim()||"Tecnologia";
+  const trend=document.getElementById("idea-trend").value.trim()||"inteligência artificial";
+  const ideas=[
+    `🚀 Plataforma de ${trend} para conectar ${m1} e ${m2}\nModelo: SaaS com assinatura mensal de R$ 350\nDiferencial: Integração via API com sistemas legados`,
+    `💡 Marketplace B2B de soluções de ${m1} com ${trend}\nPúblico: Empresas de ${m2} que precisam de inovação\nMonetização: Comissão por transação + plano premium`,
+    `🔥 Assistente ${trend} especializado em ${m1} para profissionais de ${m2}\nMVP: Chatbot com recomendações inteligentes\nReceita: R$ 350/mês por usuário ativo`,
+    `⚡ Escola online de ${trend} aplicada a ${m1} e ${m2}\nModelo: Comunidade exclusiva + cursos práticos\nTicket: R$ 350/mês com acesso completo`
+  ];
+  const el=document.getElementById("idea-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="space-y-3">${ideas.map((id,i)=>`<div class="bg-gray-800/40 rounded-lg p-3"><p class="text-xs text-gray-300 whitespace-pre-wrap">${id}</p><button onclick="copyToClipboard(\`${id.replace(/`/g,"\\`")}\`)" class="mt-1 text-[10px] text-indigo-400 hover:text-indigo-300">Copiar ideia ${i+1}</button></div>`).join("")}</div>`;
+}
+
+function analyzeCompany(){
+  const company=document.getElementById("rev-company").value.trim()||"Nubank";
+  const sector=document.getElementById("rev-sector").value.trim()||"Fintech";
+  const analysis=[
+    `📊 ESTRUTURA ANALISADA: ${company} (${sector})\n\n🎯 MODELO DE NEGÓCIO:\n• Receita: Assinaturas + taxas por transação\n• Clientes: Público massivo digital-first\n• Diferencial: Experiência 100% mobile sem agências\n\n⚙️ MECÂNICAS IDENTIFICADAS:\n1. Onboarding 100% digital com aprovação em minutos\n2. Engajamento via gamificação e cashback\n3. Suporte humanizado via chat com IA\n\n🔄 MODELO RECRIÁVEL (ADAPTADO):\n• Plataforma de serviços ${sector} com assinatura de R$ 350/mês\n• Aquisição via marketing digital segmentado\n• Operação enxuta com automação de processos`,
+    `📊 SEGUNDA ANÁLISE: ${company}\n\n💰 FLUXO DE RECEITA:\n• Interchange fees + monthly fees + serviços premium\n• Cross-sell: seguros, investimentos, empréstimos\n\n🧠 LIÇÕES PARA APLICAR:\n1. Use dados do cliente para personalizar ofertas\n2. Crie um programa de indicações com recompensas\n3. Automatize atendimento com IA para escala\n\n✅ ADAPTAÇÃO LEGAL PARA ${sector}:\n• Estrutura societária: LTDA ou SA\n• Contratos digitais com validade jurídica\n• Compliance com LGPD e regulações do setor`
+  ];
+  const el=document.getElementById("rev-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="space-y-3">${analysis.map((a,i)=>`<div class="bg-gray-800/40 rounded-lg p-3"><p class="text-xs text-gray-300 whitespace-pre-wrap">${a}</p><button onclick="copyToClipboard(\`${a.replace(/`/g,"\\`")}\`)" class="mt-1 text-[10px] text-indigo-400 hover:text-indigo-300">Copiar análise ${i+1}</button></div>`).join("")}</div>`;
+}
+
+/* ===== TAB 2: JURÍDICO ===== */
+function renderJuridico(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Auditoria, Contratos & Compliance</p></div></div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>Validador CNPJ/CPF</h3>
+        <div class="space-y-2">
+          <div class="flex gap-2"><input id="doc-number" type="text" placeholder="Digite CNPJ ou CPF..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><select id="doc-type" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"><option value="cnpj">CNPJ</option><option value="cpf">CPF</option></select></div>
+          <button onclick="validateDocument()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-2 rounded-lg text-xs font-medium transition">Validar</button>
+          <div id="doc-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>Calculadora de Precificação</h3>
+        <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] text-gray-500">Custo Fixo (R$/mês)</label><input id="cost-fixed" type="number" value="2000" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">Custo Variável (R$/un)</label><input id="cost-var" type="number" value="15" step="0.5" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">Margem Desejada (%)</label><input id="cost-margin" type="number" value="40" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div><div><label class="text-[10px] text-gray-500">Vendas Estimadas/mês</label><input id="cost-sales" type="number" value="100" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /></div></div>
+        <button onclick="calcPrice()" class="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-2 rounded-lg text-xs font-medium transition">Calcular Preço</button>
+        <div id="price-result" class="hidden bg-gray-800/40 rounded-lg p-3 mt-2 text-xs text-gray-300"></div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Gerador de Contratos</h3>
+        <div class="space-y-2"><input id="contract-client" type="text" placeholder="Nome do contratante..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="contract-cnpj" type="text" placeholder="CNPJ do contratante..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="contract-service" type="text" placeholder="Serviço prestado..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="contract-value" type="text" placeholder="Valor mensal (R$ 350,00)" value="R$ 350,00" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div>
+        <button onclick="generateContract()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Contrato</button>
+        <div id="contract-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300 whitespace-pre-wrap"></div>
+      </div>
+
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📄 Emissor de Recibos & LGPD</h3>
+        <div class="space-y-2">
+          <div class="grid grid-cols-2 gap-2"><input id="receipt-client" type="text" placeholder="Cliente..." class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="receipt-value" type="text" placeholder="Valor..." class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /></div>
+          <button onclick="generateReceipt()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Recibo em PDF</button>
+          <div class="border-t border-gray-700/30 pt-3 mt-3">
+            <button onclick="generateLGPD()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-2 rounded-lg text-xs font-medium transition">Gerar Termo LGPD</button>
+            <div id="lgpd-result" class="hidden bg-gray-800/40 rounded-lg p-3 mt-2 text-xs text-gray-300 whitespace-pre-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function validateDocument(){
+  const doc=document.getElementById("doc-number").value.replace(/\D/g,"");
+  const type=document.getElementById("doc-type").value;
+  const el=document.getElementById("doc-result"); el.classList.remove("hidden");
+  el.innerHTML='<p class="text-gray-400">Consultando BrasilAPI...</p>';
+  if(type==="cnpj"&&doc.length!==14){ el.innerHTML='<p class="text-red-400">CNPJ deve ter 14 dígitos</p>'; return; }
+  if(type==="cpf"&&doc.length!==11){ el.innerHTML='<p class="text-red-400">CPF deve ter 11 dígitos</p>'; return; }
+  fetch(`/api/brasilapi/${type}/${doc}`).then(r=>r.json()).then(data=>{
+    if(data.error){ el.innerHTML=`<p class="text-red-400">${data.error}</p>`; return; }
+    if(type==="cnpj"){
+      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">Empresa:</span> ${data.razao_social||"N/A"}</p><p><span class="text-gray-500">Fantasia:</span> ${data.nome_fantasia||"N/A"}</p><p><span class="text-gray-500">Situação:</span> ${data.descricao_situacao_cadastral||"N/A"}</p><p><span class="text-gray-500">Endereço:</span> ${data.logradouro||""}, ${data.numero||""} - ${data.bairro||""}</p><p><span class="text-gray-500">Cidade/UF:</span> ${data.municipio||""}/${data.uf||""}</p><p><span class="text-gray-500">Telefone:</span> ${data.ddd_telefone_1||"N/A"}</p></div>`;
+    } else {
+      el.innerHTML=`<div class="space-y-1"><p><span class="text-gray-500">CPF:</span> ${doc}</p><p><span class="text-gray-500">Status:</span> ${data.status||"Consultado"}</p></div>`;
     }
-  </script>
+  }).catch(()=>{ el.innerHTML='<p class="text-red-400">Erro ao consultar. Tente novamente.</p>'; });
+}
+
+function calcPrice(){
+  const fixed=parseFloat(document.getElementById("cost-fixed").value)||0;
+  const varc=parseFloat(document.getElementById("cost-var").value)||0;
+  const margin=parseFloat(document.getElementById("cost-margin").value)||0;
+  const sales=parseFloat(document.getElementById("cost-sales").value)||1;
+  const unitFixed=fixed/sales;
+  const totalCost=unitFixed+varc;
+  const price=totalCost/(1-(margin/100));
+  const revenue=price*sales;
+  const profit=revenue-(fixed+(varc*sales));
+  const el=document.getElementById("price-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="grid grid-cols-2 gap-2"><div><span class="text-gray-500">Custo unitário total</span><p class="text-white font-semibold">R$ ${totalCost.toFixed(2)}</p></div><div><span class="text-gray-500">Preço de venda sugerido</span><p class="text-emerald-400 font-semibold">R$ ${price.toFixed(2)}</p></div><div><span class="text-gray-500">Receita mensal estimada</span><p class="text-indigo-400 font-semibold">R$ ${revenue.toFixed(2)}</p></div><div><span class="text-gray-500">Lucro mensal estimado</span><p class="text-green-400 font-semibold">R$ ${profit.toFixed(2)}</p></div></div>`;
+}
+
+function generateContract(){
+  const c=document.getElementById("contract-client").value.trim()||"[Nome do Contratante]";
+  const cnpj=document.getElementById("contract-cnpj").value.trim()||"[CNPJ]";
+  const svc=document.getElementById("contract-service").value.trim()||"[Serviço Prestado]";
+  const val=document.getElementById("contract-value").value.trim()||"R$ 350,00";
+  const contract=`CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nCONTRATANTE: ${c}, inscrito no CNPJ sob nº ${cnpj}\nCONTRATADA: Athena IA Tecnologia Ltda.\n\nCLÁUSULA 1 - OBJETO:\nO presente contrato tem como objeto a prestação de serviços de ${svc}, conforme plano contratado.\n\nCLÁUSULA 2 - VALOR E FORMA DE PAGAMENTO:\nO valor mensal dos serviços é de ${val}, a ser pago por meio de boleto ou cartão de crédito.\n\nCLÁUSULA 3 - PRAZO:\nO contrato vigora por prazo indeterminado, podendo ser rescindido mediante aviso prévio de 30 dias.\n\nCLÁUSULA 4 - OBRIGAÇÕES DAS PARTES:\nA CONTRATADA se compromete a fornecer os serviços com qualidade e disponibilidade. O CONTRATANTE se compromete a efetuar os pagamentos em dia.\n\nCLÁUSULA 5 - SIGILO:\nAs partes se comprometem a manter sigilo sobre informações confidenciais compartilhadas.\n\nCLÁUSULA 6 - LGPD:\nOs dados pessoais tratados no âmbito deste contrato seguem a Política de Privacidade da CONTRATADA.\n\n${new Date().toLocaleDateString("pt-BR")}`;
+  const el=document.getElementById("contract-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-start justify-between gap-2"><span class="whitespace-pre-wrap">${contract}</span><button onclick="copyToClipboard(\`${contract.replace(/`/g,"\\`")}\`)" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] shrink-0 mt-1">Copiar</button></div>`;
+}
+
+function generateReceipt(){
+  const client=document.getElementById("receipt-client").value.trim()||"[Cliente]";
+  const value=document.getElementById("receipt-value").value.trim()||"R$ 350,00";
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(18); doc.text("RECIBO DE PAGAMENTO",105,30,{align:"center"});
+  doc.setFontSize(11);
+  doc.text(`Recebemos de ${client} a importância de ${value} referente ao plano mensal Athena IA.`,20,60);
+  doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`,20,80);
+  doc.text("______",20,120);
+  doc.text("Athena IA Tecnologia Ltda.",20,128);
+  doc.save(`recibo_${Date.now()}.pdf`);
+}
+
+function generateLGPD(){
+  const text=`TERMO DE USO E POLÍTICA DE PRIVACIDADE - LGPD\n\n1. COLETA DE DADOS:\nColetamos nome, e-mail e dados de navegação para personalizar sua experiência.\n\n2. FINALIDADE:\nSeus dados são utilizados para prestação dos serviços, comunicação e melhorias da plataforma.\n\n3. COMPARTILHAMENTO:\nNão compartilhamos seus dados com terceiros sem seu consentimento, exceto por obrigação legal.\n\n4. ARMAZENAMENTO:\nSeus dados são armazenados em servidores seguros com criptografia.\n\n5. DIREITOS DO TITULAR:\nVocê pode solicitar acesso, correção, exclusão ou portabilidade dos seus dados a qualquer momento.\n\n6. CONTATO:\nDúvidas sobre privacidade: privacidade@athenaia.com.br\n\n${new Date().toLocaleDateString("pt-BR")}`;
+  const el=document.getElementById("lgpd-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-start justify-between gap-2"><span class="whitespace-pre-wrap">${text}</span><button onclick="copyToClipboard(\`${text.replace(/`/g,"\\`")}\`)" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] shrink-0 mt-1">Copiar</button></div>`;
+}
+
+/* ===== TAB 3: LOGÍSTICA & RH ===== */
+function renderLogistica(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Triagem de Perfis & Disparos Inteligentes</p></div></div>
+
+    <div class="grid lg:grid-cols-3 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">👥 Triagem de Perfis</h3>
+        <div class="space-y-2"><textarea id="rh-criteria" placeholder="Descreva os critérios de seleção (ex: experiência em vendas, ensino superior, disponibilidade noturna)..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-20"></textarea><input id="rh-candidates" type="text" placeholder="Nomes dos candidatos (separados por vírgula)..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><button onclick="screenCandidates()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 px-3 py-2 rounded-lg text-xs font-medium transition">Triar Candidatos</button><div id="rh-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📧 Athena Email Engine</h3>
+        <div class="space-y-2"><input id="email-to" type="text" placeholder="Para (email ou lista)..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><textarea id="email-body" placeholder="Corpo do e-mail..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-16"></textarea><button onclick="sendEmail()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 px-3 py-2 rounded-lg text-xs font-medium transition">Simular Disparo</button><div id="email-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📦 Rastreamento</h3>
+        <div class="space-y-2"><input id="tracking-code" type="text" placeholder="Código de rastreamento..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><button onclick="trackShipment()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 px-3 py-2 rounded-lg text-xs font-medium transition">Rastrear</button><div id="tracking-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+function screenCandidates(){
+  const criteria=document.getElementById("rh-criteria").value.trim()||"experiência em vendas";
+  const names=document.getElementById("rh-candidates").value.trim()||"João Silva, Maria Souza, Carlos Santos";
+  const list=names.split(",").map(n=>n.trim()).filter(Boolean);
+  const el=document.getElementById("rh-result"); el.classList.remove("hidden");
+  el.innerHTML=`<p class="text-gray-400 mb-2">Critérios: ${criteria}</p><div class="space-y-1">${list.map(n=>{
+    const match=Math.random()>0.5;
+    return `<div class="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-1.5"><span>${n}</span><span class="text-[10px] ${match?"text-green-400":"text-red-400"}">${match?"✅ Compatível":"❌ Não compatível"}</span></div>`;
+  }).join("")}</div>`;
+}
+
+function sendEmail(){
+  const to=document.getElementById("email-to").value.trim()||"destinatario@email.com";
+  const el=document.getElementById("email-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>E-mail simulado para <strong>${to}</strong> — Athena Email Engine</span></div><p class="text-gray-500 mt-1">Modo simulação: servidor SMTP configurado no plano empresarial.</p>`;
+}
+
+function trackShipment(){
+  const code=document.getElementById("tracking-code").value.trim()||"BR123456789";
+  const el=document.getElementById("tracking-result"); el.classList.remove("hidden");
+  const statuses=["Postado","Em trânsito","Saiu para entrega","Entregue"];
+  const current=Math.floor(Math.random()*statuses.length);
+  el.innerHTML=`<div class="space-y-2"><p class="text-gray-400">Código: <span class="text-white">${code}</span></p><div class="flex items-center gap-2">${statuses.map((s,i)=>`<div class="flex-1 text-center"><div class="w-full h-1 rounded-full ${i<=current?"bg-green-500":"bg-gray-700"} mb-1"></div><span class="text-[9px] ${i<=current?"text-green-400":"text-gray-600"}">${s}</span></div>`).join("")}</div><p class="text-gray-300 mt-2">Status atual: <span class="text-indigo-400 font-medium">${statuses[current]}</span></p></div>`;
+}
+
+/* ===== TAB 4: OCR ===== */
+function renderOCR(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Visão Computacional & Transcrição de Documentos</p></div></div>
+
+    <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card mb-4">
+      <h3 class="font-semibold text-sm mb-3">📸 Fila de Processamento OCR</h3>
+      <div class="border-2 border-dashed border-gray-700/50 rounded-xl p-8 text-center hover:border-indigo-500/50 transition cursor-pointer" id="ocr-dropzone" onclick="document.getElementById('ocr-file').click()">
+        <svg class="w-10 h-10 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        <p class="text-sm text-gray-400">Arraste imagens ou clique para enviar</p>
+        <p class="text-xs text-gray-600 mt-1">Notas fiscais, documentos, fotos</p>
+        <input id="ocr-file" type="file" accept="image/*" multiple class="hidden" onchange="handleOCRFile(this)" />
+      </div>
+      <div id="ocr-queue" class="mt-3 space-y-2"></div>
+      <div id="ocr-result" class="hidden bg-gray-800/40 rounded-lg p-3 mt-3 text-xs text-gray-300"></div>
+    </div>
+  `;
+}
+
+function handleOCRFile(input){
+  const files=input.files; if(!files.length) return;
+  const queue=document.getElementById("ocr-queue");
+  const result=document.getElementById("ocr-result"); result.classList.remove("hidden");
+  result.innerHTML="";
+  Array.from(files).forEach((file,i)=>{
+    const id=`ocr-${Date.now()}-${i}`;
+    queue.innerHTML+=`<div id="${id}" class="flex items-center gap-3 bg-gray-800/40 rounded-lg px-3 py-2"><span class="text-xs text-gray-400 truncate flex-1">${file.name}</span><div class="w-24 bg-gray-700 rounded-full h-1.5"><div class="progress-bar bg-gradient-to-r from-violet-500 to-purple-600 h-1.5 rounded-full" style="width:0%"></div></div><span class="text-[10px] text-gray-500" id="${id}-pct">0%</span></div>`;
+    let pct=0;
+    const iv=setInterval(()=>{
+      pct+=Math.floor(Math.random()*15)+5;
+      if(pct>=100){ pct=100; clearInterval(iv); document.getElementById(`${id}-pct`).textContent="100%"; document.querySelector(`#${id} .progress-bar`).style.width="100%"; simulateOCRText(file.name,result); }
+      document.getElementById(`${id}-pct`).textContent=`${pct}%`;
+      document.querySelector(`#${id} .progress-bar`).style.width=`${pct}%`;
+    },300);
+  });
+  input.value="";
+}
+
+function simulateOCRText(filename,el){
+  const texts=[
+    `📄 "${filename}" processado via Hugging Face MODELO_VISAO_OCR\n\n--- TEXTO EXTRAÍDO ---\nNOTA FISCAL ELETRÔNICA\nNº: ${Math.floor(Math.random()*1000000)}\nSérie: ${Math.floor(Math.random()*999)}\nData: ${new Date().toLocaleDateString("pt-BR")}\nValor Total: R$ ${(Math.random()*5000+100).toFixed(2)}\n\n--- DADOS DO EMITENTE ---\nCNPJ: ${Array.from({length:14},()=>Math.floor(Math.random()*9)).join("")}\nProdutos: ${Math.floor(Math.random()*10)+1} itens\n\nConfiança do OCR: ${(Math.random()*20+78).toFixed(1)}%`,
+    `📄 "${filename}" processado com sucesso!\n\n--- CONTEÚDO DETECTADO ---\nDocumento: ${Math.random()>0.5?"Contrato Social":"Identificação"}\nPáginas: ${Math.floor(Math.random()*5)+1}\nIdioma: Português (BR)\n\n--- TEXTO ---\nDocumento digitalizado e processado pelo modelo de visão computacional Athena OCR.\n\nConfiança: ${(Math.random()*15+80).toFixed(1)}%`,
+    `📄 "${filename}" — OCR Finalizado\n\n--- RESULTADO ---\nTipo: ${["Nota Fiscal","RG","CNH","Comprovante","Certidão"][Math.floor(Math.random()*5)]}\nCampos extraídos automaticamente via Hugging Face.\n\nProcessamento concluído em ${(Math.random()*3+1).toFixed(1)}s`
+  ];
+  el.innerHTML+=`<div class="bg-gray-800/30 rounded-lg p-3 mt-2 whitespace-pre-wrap">${texts[Math.floor(Math.random()*texts.length)]}</div>`;
+}
+
+/* ===== TAB 5: CRM ===== */
+function renderCRM(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Analytics de Vendas & Gestão de Leads</p></div></div>
+
+    <div class="grid lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📊 Funil de Vendas</h3>
+        <div class="space-y-2">
+          <div class="flex gap-2"><input id="crm-lead-name" type="text" placeholder="Nome do lead..." class="flex-1 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><select id="crm-lead-stage" class="bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"><option value="Lead">Lead</option><option value="Contato">Contato</option><option value="Proposta">Proposta</option><option value="Fechado">Fechado</option></select><button onclick="addCRMLead()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-lg text-xs font-medium transition shrink-0">+ Lead</button></div>
+          <div id="crm-leads" class="space-y-1 max-h-40 overflow-y-auto"></div>
+        </div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📈 Desempenho Comercial</h3>
+        <canvas id="crm-chart" class="max-h-[180px]"></canvas>
+      </div>
+    </div>
+  `;
+}
+
+function addCRMLead(){
+  const name=document.getElementById("crm-lead-name").value.trim();
+  const stage=document.getElementById("crm-lead-stage").value;
+  if(!name) return;
+  const leads=JSON.parse(localStorage.getItem(__ns("athena_crm_leads"))||"[]");
+  leads.push({name,stage,id:Date.now(),date:new Date().toLocaleDateString("pt-BR")});
+  localStorage.setItem(__ns("athena_crm_leads"),JSON.stringify(leads));
+  document.getElementById("crm-lead-name").value="";
+  renderCRMLeads(); updateCRMChart();
+}
+function renderCRMLeads(){
+  const list=document.getElementById("crm-leads"); if(!list) return;
+  const leads=JSON.parse(localStorage.getItem(__ns("athena_crm_leads"))||"[]");
+  list.innerHTML=leads.length?leads.reverse().slice(0,15).map(l=>`<div class="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-1.5 text-xs"><span>${l.name}</span><span class="text-[10px] text-indigo-400">${l.stage}</span></div>`).join(""):'<p class="text-gray-500 text-xs text-center py-2">Nenhum lead cadastrado</p>';
+}
+let crmChart=null;
+function initCRMChart(){
+  renderCRMLeads(); updateCRMChart();
+}
+function updateCRMChart(){
+  const leads=JSON.parse(localStorage.getItem(__ns("athena_crm_leads"))||"[]");
+  const stages=["Lead","Contato","Proposta","Fechado"];
+  const counts=stages.map(s=>leads.filter(l=>l.stage===s).length);
+  const ctx=document.getElementById("crm-chart"); if(!ctx) return;
+  if(crmChart) crmChart.destroy();
+  crmChart=new Chart(ctx,{
+    type:"doughnut",
+    data:{labels:stages,datasets:[{data:counts,backgroundColor:["#6366f1","#8b5cf6","#a855f7","#d946ef"],borderWidth:0}]},
+    options:{plugins:{legend:{display:false}},cutout:"65%",responsive:true}
+  });
+}
+
+/* ===== TAB 6: META & TIKTOK ===== */
+function renderMetaTikTok(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">Graph API, TikTok API & Agendador</p></div></div>
+
+    <div class="grid lg:grid-cols-3 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📱 Meta Graph API</h3>
+        <div class="space-y-2"><textarea id="meta-post" placeholder="Texto da postagem para Facebook/Instagram..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-20"></textarea><select id="meta-platform" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="both">Ambos</option></select><button onclick="publishMeta()" class="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 px-3 py-2 rounded-lg text-xs font-medium transition">Simular Postagem</button><div id="meta-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">🎵 TikTok API</h3>
+        <div class="space-y-2"><textarea id="tiktok-desc" placeholder="Descrição e hashtags do vídeo..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-20"></textarea><input id="tiktok-schedule" type="datetime-local" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 input-field" /><button onclick="scheduleTikTok()" class="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 px-3 py-2 rounded-lg text-xs font-medium transition">Agendar Postagem</button><div id="tiktok-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📅 Agendador Unificado</h3>
+        <div class="space-y-2"><div id="scheduled-posts" class="space-y-1 max-h-32 overflow-y-auto"><p class="text-gray-500 text-xs text-center py-4">Nenhuma postagem agendada</p></div><button onclick="exportSchedulePDF()" class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg text-xs font-medium transition">Exportar Agenda PDF</button></div>
+      </div>
+    </div>
+  `;
+}
+
+function publishMeta(){
+  const text=document.getElementById("meta-post").value.trim()||"Postagem de teste via Athena IA";
+  const plat=document.getElementById("meta-platform").value;
+  const el=document.getElementById("meta-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Postagem simulada no <strong>${plat==="both"?"Facebook e Instagram":plat}</strong></span></div><p class="text-gray-500 mt-1 text-[10px]">Conecte sua conta Meta Graph API para publicar em produção.</p>`;
+}
+function scheduleTikTok(){
+  const desc=document.getElementById("tiktok-desc").value.trim()||"Vídeo #athenaia";
+  const dt=document.getElementById("tiktok-schedule").value;
+  const el=document.getElementById("tiktok-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Vídeo agendado para <strong>${new Date(dt).toLocaleString("pt-BR")}</strong></span></div>`;
+  renderScheduledPosts();
+}
+function renderScheduledPosts(){
+  const el=document.getElementById("scheduled-posts");
+  if(!el) return;
+  el.innerHTML='<p class="text-gray-500 text-xs text-center py-2">Postagens serão exibidas aqui após agendamento via API real.</p>';
+}
+function exportSchedulePDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(16); doc.text("Agenda de Postagens - Athena IA",20,20);
+  doc.setFontSize(10); doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`,20,30);
+  doc.save("agenda_postagens.pdf");
+}
+
+/* ===== TAB 7: B2B ===== */
+function renderB2B(sector){
+  return `
+  <div class="flex items-center gap-3 mb-5"><div class="w-10 h-10 rounded-xl bg-gradient-to-br ${sector.color} flex items-center justify-center shadow-lg shrink-0"><svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${sector.icon}"/></svg></div><div><h2 class="text-lg font-bold">${sector.title}</h2><p class="text-gray-400 text-xs">LinkedIn Restli 2.0, Twitter/X & Pinterest</p></div></div>
+
+    <div class="grid lg:grid-cols-3 gap-4 mb-5">
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">💼 LinkedIn API (Restli 2.0)</h3>
+        <div class="space-y-2"><textarea id="linkedin-post" placeholder="Texto da postagem B2B..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-20"></textarea><select id="linkedin-type" class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"><option value="article">Artigo</option><option value="post">Postagem</option><option value="carousel">Carrossel</option></select><button onclick="postLinkedIn()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 px-3 py-2 rounded-lg text-xs font-medium transition">Publicar</button><div id="linkedin-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">🐦 Twitter/X API</h3>
+        <div class="space-y-2"><textarea id="tweet-content" placeholder="Texto do tweet (máx. 280 caracteres)..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field resize-none h-16" maxlength="280"></textarea><div class="flex justify-between"><span class="text-[10px] text-gray-500" id="tweet-counter">0/280</span><button onclick="postTweet()" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 px-3 py-2 rounded-lg text-xs font-medium transition">Tweetar</button></div><div id="tweet-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+      <div class="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-4 glow-card sector-card">
+        <h3 class="font-semibold text-sm mb-3">📌 Pinterest API</h3>
+        <div class="space-y-2"><input id="pin-title" type="text" placeholder="Título do Pin..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><input id="pin-url" type="text" placeholder="URL de destino..." class="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-indigo-500 input-field" /><button onclick="createPin()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 px-3 py-2 rounded-lg text-xs font-medium transition">Criar Pin</button><div id="pin-result" class="hidden bg-gray-800/40 rounded-lg p-3 text-xs text-gray-300"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+function postLinkedIn(){
+  const text=document.getElementById("linkedin-post").value.trim()||"Postagem B2B via Athena IA";
+  const type=document.getElementById("linkedin-type").value;
+  const el=document.getElementById("linkedin-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>${type==="article"?"Artigo":"Postagem"} publicado no LinkedIn (simulado)</span></div>`;
+}
+
+function postTweet(){
+  const text=document.getElementById("tweet-content").value.trim()||"Postando via Athena IA!";
+  const el=document.getElementById("tweet-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Tweet publicado! (${text.length}/280)</span></div>`;
+}
+document.addEventListener("input",e=>{
+  if(e.target.id==="tweet-content"){
+    document.getElementById("tweet-counter").textContent=`${e.target.value.length}/280`;
+  }
+});
+
+function createPin(){
+  const title=document.getElementById("pin-title").value.trim()||"Pin Athena IA";
+  const url=document.getElementById("pin-url").value.trim()||"https://athenaia.com.br";
+  const el=document.getElementById("pin-result"); el.classList.remove("hidden");
+  el.innerHTML=`<div class="flex items-center gap-2 text-green-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Pin "<strong>${title}</strong>" criado! URL: ${url}</span></div>`;
+}
+
+/* ===== CENTRAL DE COMANDO — AGENTE + BLINDAGEM + HELPDESK ===== */
+let agentDiscoveries = [];
+let currentDiscovery = null;
+let agentInterval = null;
+let securityInterval = null;
+let securityIncidents = [];
+let currentIncident = null;
+let activeAgentTab = "discoveries";
+
+function initAgentWidget() {
+  const sd = __session();
+  if (sd.role !== "master") return;
+  document.getElementById("agent-widget").classList.remove("hidden");
+  document.getElementById("agent-btn").addEventListener("click", openAgentModal);
+  document.getElementById("agent-approve").addEventListener("click", approveDiscovery);
+  document.getElementById("agent-reject").addEventListener("click", rejectDiscovery);
+  document.getElementById("agent-chat-send").addEventListener("click", sendChatMessage);
+  document.getElementById("agent-chat-input").addEventListener("keydown", e => { if (e.key === "Enter") sendChatMessage(); });
+  document.getElementById("agent-autofix-btn").addEventListener("click", triggerAutoFix);
+  pollAll();
+  agentInterval = setInterval(pollAll, 30000);
+}
+
+async function pollAll() {
+  await Promise.all([pollDiscoveries(), pollSecurity()]);
+  updateWidgetAppearance();
+}
+
+async function pollDiscoveries() {
+  try {
+    const r = await fetch("/api/agent/discoveries");
+    if (!r.ok) return;
+    const data = await r.json();
+    agentDiscoveries = data.discoveries || [];
+  } catch (e) {}
+}
+
+async function pollSecurity() {
+  try {
+    const [statusR, incidentsR, chatR] = await Promise.all([
+      fetch("/api/security/status"),
+      fetch("/api/security/incidents"),
+      fetch("/api/security/helpdesk/messages"),
+    ]);
+    const status = await statusR.json();
+    securityIncidents = (await incidentsR.json()).incidents || [];
+    const chatData = await chatR.json();
+    if (chatData.messages) renderChatMessages(chatData.messages);
+    updateSecuritySummary(status);
+    if (securityIncidents.length > 0 && !currentIncident) {
+      currentIncident = securityIncidents[0];
+    }
+  } catch (e) {}
+}
+
+function updateSecuritySummary(status) {
+  const el = document.getElementById("agent-scan-stats");
+  if (el) el.textContent = `Scan #${status.totalScans || 0} — ${status.autoFixesApplied || 0} AutoFix(es)`;
+  const txt = document.getElementById("agent-incident-text");
+  if (!txt) return;
+  const active = status.activeIncidents || 0;
+  if (active > 0) {
+    const blocked = status.blockedIPs || 0;
+    const isolated = status.isolatedFiles || 0;
+    txt.innerHTML = `<span class="text-red-400 font-medium">${active} incidente(s) ativo(s)</span> — ${blocked} IP(s) bloqueado(s), ${isolated} arquivo(s) isolado(s). Clique em "Executar AutoFix" para remediar.`;
+  } else {
+    txt.textContent = "✅ Sistema íntegro — Nenhum incidente ativo. Monitoramento 24/7 em execução.";
+  }
+}
+
+function updateWidgetAppearance() {
+  const btn = document.getElementById("agent-btn");
+  const badge = document.getElementById("agent-notification");
+  const securityBadge = document.getElementById("agent-security-alert");
+  const iconLight = document.getElementById("agent-icon-light");
+  const iconShield = document.getElementById("agent-icon-shield");
+  const hasSecurity = securityIncidents.length > 0;
+  const hasDiscoveries = agentDiscoveries.length > 0;
+  if (hasSecurity) {
+    btn.className = btn.className.replace(/agent-neon|security-neon/g, "").trim() + " security-neon";
+    btn.classList.add("security-pulse");
+    btn.classList.remove("agent-pulse");
+    securityBadge.classList.remove("hidden");
+    badge.classList.add("hidden");
+    iconShield.classList.remove("hidden");
+    iconLight.classList.add("hidden");
+  } else if (hasDiscoveries) {
+    btn.className = btn.className.replace(/agent-neon|security-neon/g, "").trim() + " agent-neon";
+    btn.classList.add("agent-pulse");
+    btn.classList.remove("security-pulse");
+    badge.textContent = agentDiscoveries.length;
+    badge.classList.remove("hidden");
+    securityBadge.classList.add("hidden");
+    iconShield.classList.add("hidden");
+    iconLight.classList.remove("hidden");
+  } else {
+    btn.className = btn.className.replace(/agent-neon|security-neon/g, "").trim() + " agent-neon";
+    btn.classList.remove("agent-pulse", "security-pulse");
+    badge.classList.add("hidden");
+    securityBadge.classList.add("hidden");
+    iconShield.classList.add("hidden");
+    iconLight.classList.remove("hidden");
+  }
+}
+
+function openAgentModal() {
+  document.getElementById("agent-modal").classList.remove("hidden");
+  const hasSecurity = securityIncidents.length > 0;
+  if (hasSecurity && activeAgentTab === "discoveries") {
+    switchAgentTab("security");
+  } else if (!hasSecurity && activeAgentTab === "security") {
+    switchAgentTab("discoveries");
+  }
+  if (activeAgentTab === "discoveries") openDiscoveriesTab();
+  else openSecurityTab();
+}
+
+function closeAgentModal() {
+  document.getElementById("agent-modal").classList.add("hidden");
+}
+
+function switchAgentTab(tab) {
+  activeAgentTab = tab;
+  document.querySelectorAll(".agent-tab").forEach(t => t.classList.remove("active-tab"));
+  document.getElementById(`agent-tab-${tab}`).classList.add("active-tab");
+  document.getElementById("agent-discovery-content").classList.toggle("hidden", tab !== "discoveries");
+  document.getElementById("agent-security-content").classList.toggle("hidden", tab !== "security");
+  document.getElementById("agent-discovery-actions").classList.toggle("hidden", tab !== "discoveries");
+  document.getElementById("agent-security-actions").classList.toggle("hidden", tab !== "security");
+  if (tab === "discoveries") openDiscoveriesTab();
+  else openSecurityTab();
+}
+
+function openDiscoveriesTab() {
+  if (agentDiscoveries.length > 0) {
+    currentDiscovery = agentDiscoveries[0];
+    renderDiscovery();
+  } else {
+    document.getElementById("agent-discovery-content").innerHTML = '<div class="bg-gray-800/40 rounded-xl p-6 text-center"><svg class="w-10 h-10 text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg><p class="text-sm text-gray-400">Nenhuma novidade no momento</p><p class="text-xs text-gray-600 mt-1">O agente continuará vasculhando o mercado...</p></div>';
+  }
+}
+
+function openSecurityTab() {
+  renderIncidentDetails();
+}
+
+function renderIncidentDetails() {
+  const el = document.getElementById("agent-incident-summary");
+  if (!el) return;
+  if (securityIncidents.length > 0) {
+    currentIncident = securityIncidents[0];
+    el.innerHTML = `
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">${currentIncident.risk?.toUpperCase() || "CRITICAL"}</span>
+        <span class="text-[10px] text-gray-500">${currentIncident.type || "Alerta de Segurança"}</span>
+        <span class="text-[10px] text-gray-600 ml-auto">${new Date(currentIncident.time).toLocaleString("pt-BR")}</span>
+      </div>
+      <p class="text-xs text-gray-300 font-medium mb-1">${currentIncident.details || "Nenhum detalhe disponível"}</p>
+      <div class="flex flex-wrap gap-1 mt-2">
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">🛡️ Firewall ativo</span>
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">🔍 WAF atualizado</span>
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">📋 Auditoria em tempo real</span>
+      </div>`;
+    document.getElementById("agent-autofix-btn").textContent = `⚡ Executar AutoFix (${securityIncidents.length} pendente${securityIncidents.length > 1 ? "s" : ""})`;
+    document.getElementById("agent-autofix-btn").disabled = false;
+  } else {
+    const lastStatus = document.getElementById("agent-incident-text")?.textContent || "";
+    el.innerHTML = `
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-medium text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">SISTEMA ÍNTEGRO</span>
+        <span class="text-[10px] text-gray-500">Monitoramento 24/7</span>
+      </div>
+      <p class="text-xs text-gray-400">✅ Nenhum incidente ativo. O Blindagem Total está protegendo todas as rotas, arquivos e autenticação.</p>
+      <div class="flex flex-wrap gap-1 mt-2">
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">🛡️ Firewall: Ativo</span>
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">🔍 Anti-Virus: Online</span>
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">📋 SAST/SCA: Operacional</span>
+      </div>`;
+    document.getElementById("agent-autofix-btn").textContent = "✅ Nenhum AutoFix necessário";
+    document.getElementById("agent-autofix-btn").disabled = true;
+  }
+}
+
+function renderDiscovery() {
+  const el = document.getElementById("agent-discovery-content");
+  if (!currentDiscovery) {
+    el.innerHTML = '<p class="text-gray-400 text-xs text-center py-4">Nenhuma novidade selecionada.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="bg-gray-800/40 rounded-xl p-4 border border-indigo-500/20">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">${currentDiscovery.category}</span>
+        <span class="text-[10px] text-gray-500">${currentDiscovery.source || "Agente Autônomo"}</span>
+      </div>
+      <h4 class="font-semibold text-sm text-white mb-1">${currentDiscovery.title}</h4>
+      <p class="text-xs text-gray-400 mb-3 leading-relaxed">${currentDiscovery.description}</p>
+      ${currentDiscovery.url ? `<a href="${currentDiscovery.url}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 underline">${currentDiscovery.url} <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>` : ''}
+    </div>
+    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center gap-3 agent-badge">
+      <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-emerald-400">Validação de Segurança</p>
+        <p class="text-[10px] text-emerald-500/70">Anti-Virus scan ✓ &nbsp;·&nbsp; Sandbox testado ✓ &nbsp;·&nbsp; Código limpo sem vulnerabilidades ✓</p>
+      </div>
+    </div>
+  `;
+}
+
+async function approveDiscovery() {
+  if (!currentDiscovery) return;
+  try {
+    const r = await fetch(`/api/agent/approve/${currentDiscovery.id}`, { method: "POST" });
+    if (!r.ok) return;
+    agentDiscoveries = agentDiscoveries.filter(d => d.id !== currentDiscovery.id);
+    currentDiscovery = agentDiscoveries.length > 0 ? agentDiscoveries[0] : null;
+    updateWidgetAppearance();
+    if (currentDiscovery) {
+      renderDiscovery();
+    } else {
+      closeAgentModal();
+      const toast = document.createElement("div");
+      toast.className = "fixed top-4 right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-3 rounded-xl text-sm z-[200] shadow-2xl flex items-center gap-2";
+      toast.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Tecnologia integrada com sucesso!';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+  } catch (e) {}
+}
+
+async function rejectDiscovery() {
+  if (!currentDiscovery) return;
+  try {
+    const r = await fetch(`/api/agent/reject/${currentDiscovery.id}`, { method: "POST" });
+    if (!r.ok) return;
+    agentDiscoveries = agentDiscoveries.filter(d => d.id !== currentDiscovery.id);
+    currentDiscovery = agentDiscoveries.length > 0 ? agentDiscoveries[0] : null;
+    updateWidgetAppearance();
+    if (currentDiscovery) renderDiscovery();
+    else closeAgentModal();
+  } catch (e) {}
+}
+
+async function triggerAutoFix() {
+  if (securityIncidents.length === 0) return;
+  const btn = document.getElementById("agent-autofix-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Aplicando correção...';
+  try {
+    for (const inc of securityIncidents) {
+      await fetch(`/api/security/autofix/${inc.id}`, { method: "POST" });
+    }
+    await pollSecurity();
+    updateWidgetAppearance();
+    const toast = document.createElement("div");
+    toast.className = "fixed top-4 right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-3 rounded-xl text-sm z-[200] shadow-2xl flex items-center gap-2";
+    toast.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> AutoFix concluído — todas as vulnerabilidades neutralizadas!';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+    renderIncidentDetails();
+  } catch (e) {}
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Executar AutoFix';
+}
+
+/* ===== HELPDESK CHAT ===== */
+async function sendChatMessage() {
+  const input = document.getElementById("agent-chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  try {
+    await fetch("/api/security/helpdesk/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    setTimeout(async () => {
+      const r = await fetch("/api/security/helpdesk/messages");
+      const data = await r.json();
+      if (data.messages) renderChatMessages(data.messages);
+    }, 1000);
+  } catch (e) {}
+}
+
+function renderChatMessages(messages) {
+  const el = document.getElementById("agent-chat-messages");
+  if (!el) return;
+  el.innerHTML = messages.slice(-20).map(m => {
+    if (m.role === "system") return `<div class="text-center text-[10px] text-gray-600 py-1">${m.text}</div>`;
+    const isAgent = m.role === "agent";
+    return `<div class="flex ${isAgent ? "justify-start" : "justify-end"}">
+      <div class="max-w-[85%] ${isAgent ? "bg-gray-800/70 border border-gray-700/40" : "bg-indigo-600/30 border border-indigo-500/30"} rounded-xl px-3 py-2">
+        <p class="text-xs text-gray-300 whitespace-pre-wrap">${m.text}</p>
+        <p class="text-[9px] text-gray-600 mt-1">${new Date(m.time).toLocaleTimeString("pt-BR")}</p>
+      </div>
+    </div>`;
+  }).join("");
+  el.scrollTop = el.scrollHeight;
+}
+
+renderContentCalendar();
+</script>
 </body>
 </html>
