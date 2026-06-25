@@ -14,8 +14,8 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^2.13.0",
     "open": "^11.0.0",
