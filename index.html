@@ -8,274 +8,494 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08080d;color:#ddd;min-height:100vh;overflow-x:hidden}
+    body{font-family:'Inter',sans-serif;background:#08080d;color:#ddd;min-height:100vh}
     ::-webkit-scrollbar{width:5px}
     ::-webkit-scrollbar-track{background:#12121a}
     ::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:3px}
-    ::-webkit-scrollbar-thumb:hover{background:#3a3a4a}
 
-    .header{background:linear-gradient(135deg,#0d0d15,#151525);border-bottom:1px solid #1e1e30;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+    :root{--primary:#7c3aed;--secondary:#3b82f6;--bg:#08080d;--card-bg:#11111a;--text:#ddd}
+
+    .header{background:linear-gradient(135deg,var(--card-bg),#151525);border-bottom:1px solid #1e1e30;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
     .h-left{display:flex;align-items:center;gap:12px}
-    .logo{font-size:18px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo{font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .logo span{-webkit-text-fill-color:#fff}
     .badge-247{display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;font-weight:600}
     .badge-247 .dot{width:5px;height:5px;border-radius:50%;background:#34d399;animation:pulse247 1.5s infinite}
-    @keyframes pulse247{0%,100%{opacity:1;box-shadow:0 0 4px #34d399}50%{opacity:.4;box-shadow:0 0 10px #34d399}}
-    .stats-bar{display:flex;gap:12px;font-size:10px;color:#777;flex-wrap:wrap}
-    .stats-bar strong{color:#bbb}
+    @keyframes pulse247{0%,100%{opacity:1}50%{opacity:.4}}
+    #companyBrand{display:none;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#bbb}
+    #companyBrand img{width:24px;height:24px;border-radius:50%}
 
     .nav{display:flex;gap:2px;background:#0d0d15;padding:6px 20px;border-bottom:1px solid #1a1a2a;overflow-x:auto;position:sticky;top:57px;z-index:99}
     .nav-btn{padding:8px 16px;font-size:12px;font-weight:600;border:none;background:transparent;color:#666;cursor:pointer;border-radius:8px;transition:all .3s;white-space:nowrap}
     .nav-btn:hover{background:#1a1a2a;color:#ccc}
-    .nav-btn.active{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(59,130,246,.15));color:#a78bfa}
+    .nav-btn.active{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(59,130,246,.15));color:var(--primary)}
 
     .main{max-width:1440px;margin:0 auto;padding:16px}
     .tab{display:none}
     .tab.active{display:block}
-
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
     .grid-full{grid-column:1/-1}
     .grid-3{grid-template-columns:1fr 1fr 1fr}
     .grid-4{grid-template-columns:repeat(4,1fr)}
 
-    .card{background:linear-gradient(145deg,#11111a,#0d0d15);border:1px solid #1a1a2a;border-radius:12px;padding:16px}
+    .card{background:linear-gradient(145deg,var(--card-bg),#0d0d15);border:1px solid #1a1a2a;border-radius:12px;padding:16px}
     .card-title{font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
     .card-title .sub{font-weight:400;color:#555;text-transform:none;font-size:10px}
 
+    .btn{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:8px;padding:9px 18px;color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all .3s;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(124,58,237,.4)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-sm{padding:6px 12px;font-size:10px}
+    .btn-outline{background:transparent;border:1px solid #333;color:#ddd}
+    .btn-outline:hover{border-color:var(--primary);box-shadow:none}
+    .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+    .btn-warning{background:linear-gradient(135deg,#f59e0b,#d97706)}
+    .btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626)}
+
+    /* Login Screen */
+    .login-screen{position:fixed;inset:0;z-index:9999;background:#08080d;display:flex;align-items:center;justify-content:center}
+    .login-screen.hidden{display:none}
+    .login-box{background:linear-gradient(145deg,#11111a,#0d0d15);border:1px solid #1a1a2a;border-radius:16px;padding:32px;max-width:400px;width:90%}
+    .login-box h1{font-size:24px;margin-bottom:4px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .login-box p{color:#888;font-size:13px;margin-bottom:20px}
+    .login-box input{width:100%;background:#0a0a12;border:1px solid #1e1e30;border-radius:8px;padding:10px 14px;color:#ddd;font-size:13px;outline:none;margin-bottom:10px}
+    .login-box input:focus{border-color:var(--primary)}
+    .login-box .btn{width:100%;padding:12px;font-size:14px;margin-top:4px}
+    .login-box .link{font-size:11px;color:#666;text-align:center;margin-top:12px;cursor:pointer}
+    .login-box .link:hover{color:var(--primary)}
+    .login-box .error{color:#ef4444;font-size:11px;margin-bottom:8px;display:none}
+    .login-box .freemium-badge{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:8px 12px;border-radius:8px;font-size:11px;margin-bottom:16px;text-align:center}
+
+    /* Subscription Modal */
+    .sub-modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+    .sub-modal.active{display:flex}
+    .sub-box{background:#11111a;border:1px solid #2a2a4e;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center}
+    .sub-box h2{font-size:20px;margin-bottom:8px}
+    .sub-box p{color:#888;font-size:13px;margin-bottom:16px;line-height:1.5}
+    .sub-box .price{font-size:40px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sub-box .btn{width:100%;padding:14px;font-size:15px;margin-top:8px}
+
+    .freemium-bar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:8px;margin-bottom:10px;flex-wrap:wrap}
+    .freemium-bar .badge{background:rgba(16,185,129,.1);color:#34d399;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:600}
+    .freemium-bar .btn{padding:5px 12px;font-size:10px}
+
     .agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-    .agent-card{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:10px;transition:all .3s;cursor:pointer}
+    .agent-card{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:10px;transition:all .3s}
     .agent-card:hover{border-color:#2a2a4e}
-    .agent-name{font-weight:600;font-size:12px;margin-bottom:2px}
+    .agent-name{font-weight:600;font-size:12px}
     .agent-spec{font-size:9px;color:#666;margin-bottom:6px}
     .agent-s{display:flex;align-items:center;justify-content:space-between}
-    .agent-sl{font-size:9px;padding:2px 6px;border-radius:10px;background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
-    .agent-sl.busy{background:rgba(234,179,8,.1);color:#eab308;border-color:rgba(234,179,8,.2)}
+    .agent-sl{font-size:9px;padding:2px 6px;border-radius:10px;background:rgba(34,197,94,.1);color:#22c55e}
+    .agent-sl.busy{background:rgba(234,179,8,.1);color:#eab308}
     .agent-eff{font-size:10px;color:#888}
     .agent-tasks{font-size:9px;color:#666;margin-top:3px}
-
     .console-area{display:flex;gap:8px}
-    .console-input{flex:1;background:#0a0a12;border:1px solid #1e1e30;border-radius:8px;padding:9px 12px;color:#ddd;font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:border-color .3s}
-    .console-input:focus{border-color:#7c3aed}
-    .console-input::placeholder{color:#444}
-    .btn{background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:8px;padding:9px 18px;color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all .3s;white-space:nowrap}
-    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(124,58,237,.4)}
-    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-    .btn-sm{padding:6px 12px;font-size:10px}
-
+    .console-input{flex:1;background:#0a0a12;border:1px solid #1e1e30;border-radius:8px;padding:9px 12px;color:#ddd;font-family:'Inter',sans-serif;font-size:12px;outline:none}
+    .console-input:focus{border-color:var(--primary)}
     .log-container{height:200px;overflow-y:auto;font-family:'Courier New',monospace;font-size:10px;line-height:1.6;background:#050508;border:1px solid #1a1a2a;border-radius:8px;padding:8px;margin-top:8px}
     .log-entry{padding:1px 0;border-bottom:1px solid #0a0a12}
     .log-time{color:#555}
     .log-info{color:#60a5fa}.log-debug{color:#888}.log-success{color:#34d399}.log-error{color:#f87171}.log-warn{color:#fbbf24}
-
     .chart-container{height:160px}
 
-    .missions-list{max-height:160px;overflow-y:auto}
-    .mission-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #0d0d18;font-size:10px}
-    .mission-item:last-child{border:none}
-    .mission-cmd{color:#c0c0d0;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .mission-st{padding:1px 6px;border-radius:10px;font-size:8px;font-weight:600}
-    .mission-st.processing{background:rgba(234,179,8,.1);color:#eab308}
-    .mission-st.completed{background:rgba(34,197,94,.1);color:#22c55e}
+    .pipeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;overflow-x:auto}
+    .pipeline-col{background:#0a0a12;border:1px solid #1a1a2e;border-radius:10px;padding:10px;min-height:180px}
+    .pipeline-h{font-size:10px;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between}
+    .pipeline-h .count{font-size:8px;color:#888;background:#1a1a2a;padding:1px 5px;border-radius:6px}
+    .lead-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:6px;padding:6px;margin-bottom:4px;cursor:pointer;font-size:10px}
+    .lead-name{font-weight:600;color:#c0c0d0}
+    .lead-source{font-size:8px;color:#666}
+    .lead-score{font-size:8px;padding:1px 4px;border-radius:4px;background:rgba(124,58,237,.1);color:#a78bfa;display:inline-block}
+    .social-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+    .social-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:10px;padding:12px;text-align:center}
+    .social-icon{font-size:24px;margin-bottom:4px}
+    .social-name{font-size:11px;font-weight:600}
+    .social-status{font-size:8px;padding:2px 6px;border-radius:8px;display:inline-block;margin:4px 0}
+    .social-status.connected{background:rgba(34,197,94,.1);color:#22c55e}
+    .social-status.disconnected{background:rgba(107,114,128,.1);color:#888}
 
-    .reasoning-box{background:#050508;border:1px solid #1a1a2a;border-radius:8px;padding:8px;font-family:'Courier New',monospace;font-size:10px;line-height:1.8;min-height:40px;color:#a0a0b0}
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+    .modal-overlay.active{display:flex}
+    .modal-box{background:#11111a;border:1px solid #2a2a4e;border-radius:14px;padding:24px;max-width:460px;width:90%;max-height:80vh;overflow-y:auto}
+    .modal-box .close{float:right;background:none;border:none;color:#666;font-size:20px;cursor:pointer}
 
     .metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:14px}
     .metric-card{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:10px;text-align:center}
     .metric-value{font-size:18px;font-weight:700;color:#e0e0f0}
-    .metric-label{font-size:9px;color:#666;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+    .metric-label{font-size:9px;color:#666;margin-top:3px;text-transform:uppercase}
 
-    .pipeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;overflow-x:auto}
-    .pipeline-col{background:#0a0a12;border:1px solid #1a1a2e;border-radius:10px;padding:10px;min-height:200px}
-    .pipeline-h{font-size:11px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
-    .pipeline-h .count{font-size:9px;color:#888;background:#1a1a2a;padding:1px 6px;border-radius:8px}
-    .lead-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:8px;padding:8px;margin-bottom:6px;cursor:pointer;transition:all .3s}
-    .lead-card:hover{border-color:#3a3a5e}
-    .lead-name{font-size:11px;font-weight:600;color:#c0c0d0}
-    .lead-source{font-size:9px;color:#666;margin:2px 0}
-    .lead-score{font-size:9px;padding:1px 5px;border-radius:6px;background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);display:inline-block}
-    .lead-score.high{background:rgba(16,185,129,.1);color:#34d399;border-color:rgba(16,185,129,.2)}
+    .missions-list{max-height:140px;overflow-y:auto}
+    .mission-item{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0d0d18;font-size:10px}
+    .reasoning-box{background:#050508;border:1px solid #1a1a2a;border-radius:8px;padding:8px;font-family:'Courier New',monospace;font-size:10px;line-height:1.8;min-height:40px;color:#a0a0b0}
 
-    .social-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
-    .social-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:10px;padding:14px;text-align:center;transition:all .3s}
-    .social-card:hover{border-color:#3a3a5e}
-    .social-icon{font-size:28px;margin-bottom:6px}
-    .social-name{font-size:12px;font-weight:600;margin-bottom:4px}
-    .social-status{font-size:9px;padding:2px 8px;border-radius:10px;display:inline-block;margin:4px 0}
-    .social-status.connected{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
-    .social-status.disconnected{background:rgba(107,114,128,.1);color:#888;border:1px solid rgba(107,114,128,.2)}
-    .social-btn{margin-top:8px;font-size:10px;padding:5px 12px}
-
-    /* CRM Lead Detail */
-    .lead-detail{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center}
-    .lead-detail.active{display:flex}
-    .lead-detail-box{background:#11111a;border:1px solid #2a2a4e;border-radius:14px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
-    .lead-detail-box h3{font-size:16px;margin-bottom:4px}
-    .lead-detail-box .close{float:right;background:none;border:none;color:#666;font-size:20px;cursor:pointer}
-    .lead-detail-box .close:hover{color:#eee}
-    .interaction-item{padding:6px 0;border-bottom:1px solid #0d0d18;font-size:11px}
-    .followup-item{padding:6px 0;border-bottom:1px solid #0d0d18;font-size:11px}
+    .profile-section{display:none;align-items:center;gap:10px}
+    .profile-section.active{display:flex}
+    .user-email{font-size:11px;color:#888}
+    .admin-link{font-size:10px;color:#f59e0b;text-decoration:none;font-weight:600}
+    .admin-link:hover{text-decoration:underline}
 
     @media(max-width:768px){
       .grid,.grid-3,.grid-4{grid-template-columns:1fr}
       .pipeline{grid-template-columns:1fr}
-      .nav{top:70px}
-      .header{flex-direction:column;align-items:flex-start}
+      .nav{top:57px;overflow-x:auto}
+      .login-box{padding:20px}
     }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="h-left">
-      <div class="logo">ATHENA<span> IA</span></div>
-      <div class="badge-247"><span class="dot"></span> 24/7</div>
-    </div>
-    <div class="stats-bar">
-      <span>🤖 <strong id="st-agents">-</strong></span>
-      <span>⚡ <strong id="st-active">-</strong></span>
-      <span>📦 <strong id="st-missions">-</strong></span>
-      <span>🔄 <strong id="st-cycle">-</strong></span>
-      <span>⏱️ <strong id="st-uptime">-</strong></span>
-      <span>🗄️ <strong id="st-db">-</strong></span>
-    </div>
-  </header>
-
-  <nav class="nav">
-    <button class="nav-btn active" data-tab="dashboard">📊 Dashboard</button>
-    <button class="nav-btn" data-tab="crm">💼 CRM</button>
-    <button class="nav-btn" data-tab="oauth2">🔐 OAuth2</button>
-    <button class="nav-btn" data-tab="logs">📡 Logs</button>
-  </nav>
-
-  <div class="main">
-    <!-- TAB: DASHBOARD -->
-    <div class="tab active" id="tab-dashboard">
-      <div class="metric-grid" id="dashMetrics">
-        <div class="metric-card"><div class="metric-value" id="m-tasks">0</div><div class="metric-label">Tarefas</div></div>
-        <div class="metric-card"><div class="metric-value" id="m-active">0</div><div class="metric-label">Ativos</div></div>
-        <div class="metric-card"><div class="metric-value" id="m-missions">0</div><div class="metric-label">Missões</div></div>
-        <div class="metric-card"><div class="metric-value" id="m-uptime">0s</div><div class="metric-label">Uptime</div></div>
-      </div>
-
-      <div class="grid">
-        <div class="card grid-full">
-          <div class="card-title">🎯 Comando <span class="sub">Delegue missões para os 8 agentes</span></div>
-          <div class="console-area">
-            <input type="text" class="console-input" id="cmdInput" placeholder='Ex: "analisar tendências de marketing e gerar relatório financeiro"' autofocus>
-            <button class="btn" id="sendBtn">🚀 Executar</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <div class="card-title">🤖 Agentes</div>
-          <div class="agents-grid" id="agentsGrid"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">📊 Eficiência</div>
-          <div class="chart-container"><canvas id="effChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <div class="card-title">🧠 Raciocínio</div>
-          <div class="reasoning-box" id="reasoningBox">Aguardando missão...</div>
-        </div>
-        <div class="card">
-          <div class="card-title">📋 Missões</div>
-          <div class="missions-list" id="missionsList"><div style="color:#555;font-size:10px">Nenhuma</div></div>
-        </div>
-      </div>
-
-      <div class="card grid-full">
-        <div class="card-title">📡 Logs</div>
-        <div class="log-container" id="dashLogs"><div class="log-entry"><span class="log-debug">Conectando...</span></div></div>
-      </div>
-    </div>
-
-    <!-- TAB: CRM -->
-    <div class="tab" id="tab-crm">
-      <div class="grid">
-        <div class="card grid-full">
-          <div class="card-title">💼 Pipeline de Vendas <span class="sub" id="crmLeadCount">0 leads</span></div>
-          <div class="pipeline" id="pipelineContainer"></div>
-        </div>
-      </div>
-      <div class="grid-3 grid">
-        <div class="card">
-          <div class="card-title">📊 Conversão</div>
-          <div class="chart-container"><canvas id="convChart"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">🏆 Lead Scoring</div>
-          <div id="topLeads" style="font-size:11px;color:#888">Carregando...</div>
-        </div>
-        <div class="card">
-          <div class="card-title">📬 Follow-ups</div>
-          <div id="followUpStatus" style="font-size:11px;color:#888">Motor ativo 24/7</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: OAUTH2 -->
-    <div class="tab" id="tab-oauth2">
-      <div class="card grid-full">
-        <div class="card-title">🔐 Central OAuth2 <span class="sub">Conecte suas redes sociais</span></div>
-        <div class="social-grid" id="socialGrid"></div>
-      </div>
-      <div class="grid">
-        <div class="card">
-          <div class="card-title">📡 Webhooks Ativos</div>
-          <div id="webhookStatus" style="font-size:11px;color:#888">Carregando...</div>
-        </div>
-        <div class="card">
-          <div class="card-title">🔧 Configuração</div>
-          <div style="font-size:11px;color:#888">
-            <p style="margin-bottom:8px">Configure as credenciais OAuth2 via variáveis de ambiente:</p>
-            <code style="display:block;background:#050508;padding:8px;border-radius:6px;font-size:10px;margin-bottom:6px;color:#a0a0b0">WHATSAPP_CLIENT_ID=...<br>INSTAGRAM_CLIENT_ID=...<br>FACEBOOK_CLIENT_ID=...<br>TIKTOK_CLIENT_KEY=...<br>LINKEDIN_CLIENT_ID=...<br>TELEGRAM_BOT_TOKEN=...<br>X_CLIENT_ID=...</code>
-            <p style="margin-top:8px;color:#666">Após configurar, recarregue a página para ver os botões de login.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: LOGS -->
-    <div class="tab" id="tab-logs">
-      <div class="card grid-full">
-        <div class="card-title">📡 Feeds de Decisão dos Agentes <span class="sub">Ações executadas 24/7 em tempo real</span></div>
-        <div class="log-container" id="agentLogs" style="height:500px">
-          <div class="log-entry"><span class="log-debug">Inicializando stream de logs dos agentes...</span></div>
-        </div>
-      </div>
-      <div class="grid grid-4" id="agentFilterBar" style="margin-top:8px"></div>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <h1>ATHENA IA</h1>
+      <p>Enterprise Hyperautomation Engine — Multi-Agentes 24/7</p>
+      <div class="freemium-badge">🎯 Teste grátis disponível</div>
+      <div class="error" id="loginError"></div>
+      <input type="email" id="loginEmail" placeholder="Seu email" autocomplete="email">
+      <input type="password" id="loginPassword" placeholder="Sua senha" autocomplete="current-password">
+      <button class="btn" id="loginBtn">🔐 Entrar</button>
+      <div class="link" id="showRegister">Não tem conta? <strong>Cadastre-se grátis</strong></div>
+      <div class="link" id="showLogin" style="display:none">Já tem conta? <strong>Fazer login</strong></div>
+      <button class="btn btn-outline" id="freemiumBtn" style="margin-top:10px;width:100%;padding:10px;font-size:12px">🎮 Testar Grátis (Demonstração Limitada)</button>
     </div>
   </div>
 
-  <!-- Lead Detail Modal -->
-  <div class="lead-detail" id="leadModal">
-    <div class="lead-detail-box">
-      <button class="close" id="leadModalClose">&times;</button>
-      <h3 id="ld-name">Lead</h3>
-      <div style="font-size:11px;color:#888;margin-bottom:12px" id="ld-meta"></div>
-      <div style="margin-bottom:8px"><span id="ld-score" class="lead-score"></span></div>
-      <div class="card-title" style="margin-top:12px">📝 Interações</div>
-      <div id="ld-interactions" style="max-height:150px;overflow-y:auto"></div>
-      <div class="card-title" style="margin-top:8px">📬 Follow-ups</div>
-      <div id="ld-followups" style="max-height:120px;overflow-y:auto"></div>
-      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-sm" id="ld-followup-btn">📬 Agendar Follow-up</button>
+  <!-- Subscription Modal -->
+  <div class="sub-modal" id="subModal">
+    <div class="sub-box">
+      <h2>🚀 Assine o Plano Premium</h2>
+      <p>Você está usando o modo de demonstração. Para acesso completo e irrestrito a todos os 8 agentes, CRM preditivo, integrações e suporte 24/7, assine agora.</p>
+      <div class="price">R$ 350</div>
+      <div style="color:#888;font-size:13px;margin-bottom:16px">/mês · Cancele quando quiser</div>
+      <ul style="list-style:none;text-align:left;margin-bottom:16px;font-size:12px;color:#bbb">
+        <li style="padding:4px 0">✓ 8 agentes de IA setoriais</li>
+        <li style="padding:4px 0">✓ CRM preditivo com pipeline</li>
+        <li style="padding:4px 0">✓ Integração com 7 redes sociais</li>
+        <li style="padding:4px 0">✓ Processamento 24 horas por dia</li>
+        <li style="padding:4px 0">✓ Personalização white-label</li>
+        <li style="padding:4px 0">✓ Suporte prioritário</li>
+      </ul>
+      <input type="email" id="subEmail" placeholder="Seu email para faturamento" style="width:100%;background:#0a0a12;border:1px solid #1e1e30;border-radius:8px;padding:10px 14px;color:#ddd;font-size:13px;outline:none;margin-bottom:10px">
+      <button class="btn" id="subBtn">💳 Assinar por R$ 350/mês</button>
+      <div style="margin-top:10px;font-size:10px;color:#555">Pagamento 100% seguro via Mercado Pago</div>
+    </div>
+  </div>
+
+  <div id="appContent" style="display:none">
+    <header class="header">
+      <div class="h-left">
+        <div class="logo">ATHENA<span> IA</span></div>
+        <div class="badge-247"><span class="dot"></span> 24/7</div>
+        <div id="companyBrand"><img id="brandLogo" alt=""><span id="brandName"></span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="profile-section" id="profileSection">
+          <span class="user-email" id="userEmail"></span>
+          <a href="/admin.html" class="admin-link" id="adminLink" style="display:none">🔑 Admin</a>
+          <button class="btn btn-sm btn-outline" id="logoutBtn" style="padding:4px 8px;font-size:9px">Sair</button>
+        </span>
+        <span class="stats-bar" style="display:flex;gap:10px;font-size:9px;color:#777">
+          <strong id="st-agents">-</strong> 🤖 <strong id="st-active">-</strong> ⚡ <strong id="st-cycle">-</strong> 🔄
+        </span>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="nav-btn" data-tab="crm">💼 CRM</button>
+      <button class="nav-btn" data-tab="oauth2">🔐 OAuth2</button>
+      <button class="nav-btn" data-tab="config">⚙️ Config</button>
+      <button class="nav-btn" data-tab="logs">📡 Logs</button>
+    </nav>
+
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div class="tab active" id="tab-dashboard">
+        <div class="freemium-bar" id="freemiumBar">
+          <span class="badge">🎮 Demo</span>
+          <span style="font-size:11px;color:#888">Você está no modo de teste gratuito</span>
+          <button class="btn btn-sm btn-success" id="freemiumTestBtn" style="margin-left:auto">🎯 Testar Agora</button>
+          <button class="btn btn-sm btn-warning" id="freemiumSubBtn">💳 Assinar R$ 350</button>
+        </div>
+
+        <div class="metric-grid" id="dashMetrics">
+          <div class="metric-card"><div class="metric-value" id="m-tasks">0</div><div class="metric-label">Tarefas</div></div>
+          <div class="metric-card"><div class="metric-value" id="m-active">0</div><div class="metric-label">Ativos</div></div>
+          <div class="metric-card"><div class="metric-value" id="m-missions">0</div><div class="metric-label">Missões</div></div>
+          <div class="metric-card"><div class="metric-value" id="m-uptime">0s</div><div class="metric-label">Uptime</div></div>
+        </div>
+
+        <div class="grid">
+          <div class="card grid-full">
+            <div class="card-title" id="consoleTitle">🎯 Console <span class="sub">Comandos para os agentes</span></div>
+            <div class="console-area">
+              <input type="text" class="console-input" id="cmdInput" placeholder='Ex: "analisar marketing e gerar relatório financeiro"'>
+              <button class="btn" id="sendBtn">🚀 Executar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card"><div class="card-title">🤖 Agentes</div><div class="agents-grid" id="agentsGrid"></div></div>
+          <div class="card"><div class="card-title">📊 Eficiência</div><div class="chart-container"><canvas id="effChart"></canvas></div></div>
+        </div>
+
+        <div class="grid">
+          <div class="card"><div class="card-title">🧠 Raciocínio</div><div class="reasoning-box" id="reasoningBox">Aguardando missão...</div></div>
+          <div class="card"><div class="card-title">📋 Missões</div><div class="missions-list" id="missionsList"><div style="color:#555;font-size:10px">Nenhuma</div></div></div>
+        </div>
+
+        <div class="card grid-full">
+          <div class="card-title">📡 Logs</div>
+          <div class="log-container" id="dashLogs"><div class="log-entry"><span class="log-debug">Conectando...</span></div></div>
+        </div>
+      </div>
+
+      <!-- CRM -->
+      <div class="tab" id="tab-crm">
+        <div class="card grid-full">
+          <div class="card-title">💼 Pipeline</div>
+          <div class="pipeline" id="pipelineContainer"></div>
+        </div>
+        <div class="grid-3 grid">
+          <div class="card"><div class="card-title">📊 Conversão</div><div class="chart-container"><canvas id="convChart"></canvas></div></div>
+          <div class="card"><div class="card-title">🏆 Top Leads</div><div id="topLeads" style="font-size:10px;color:#888"></div></div>
+          <div class="card"><div class="card-title">📬 Follow-ups</div><div id="followUpStatus" style="font-size:10px;color:#888">Motor ativo 24/7</div></div>
+        </div>
+      </div>
+
+      <!-- OAUTH2 -->
+      <div class="tab" id="tab-oauth2">
+        <div class="card grid-full"><div class="card-title">🔐 Central OAuth2</div><div class="social-grid" id="socialGrid"></div></div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="tab" id="tab-config">
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">👤 Meu Perfil</div>
+            <div style="font-size:12px;color:#888;margin-bottom:12px">
+              <div style="margin-bottom:6px">Email: <strong id="cfgEmail" style="color:#ddd">-</strong></div>
+              <div style="margin-bottom:6px">Tenant: <code id="cfgTenant" style="font-size:9px;color:#666">-</code></div>
+              <div style="margin-bottom:6px">Plano: <strong id="cfgPlan" style="color:#34d399">-</strong></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🎨 Personalização</div>
+            <div style="font-size:11px;color:#888;margin-bottom:10px">Insira seu CPF ou CNPJ para personalizar o layout automaticamente.</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <input type="text" id="cfgDoc" placeholder="CPF ou CNPJ" style="flex:1;background:#0a0a12;border:1px solid #1e1e30;border-radius:6px;padding:8px 10px;color:#ddd;font-size:11px;outline:none">
+              <button class="btn btn-sm" id="cfgDocBtn">Buscar</button>
+            </div>
+            <div id="cfgDocResult" style="font-size:11px"></div>
+            <div style="margin-top:10px;font-size:10px;color:#555">As cores, logo e nome da empresa serão aplicados automaticamente na interface.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="tab" id="tab-logs">
+        <div class="card grid-full">
+          <div class="card-title">📡 Ações dos Agentes 24/7</div>
+          <div class="log-container" id="agentLogs" style="height:500px"><div class="log-entry"><span class="log-debug">Conectando...</span></div></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const $=s=>document.querySelector(s); const $$=s=>document.querySelectorAll(s);
-    let effChart=null, convChart=null, currentLeadId=null;
+    // ===== Auth State =====
+    let TOKEN = localStorage.getItem('athena_token') || '';
+    let USER = null;
+    let IS_MASTER = false;
+    let IS_FREEMIUM = !TOKEN;
+    let SUB_REQUIRED = false;
 
-    // Navigation
-    $$('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+    const $=s=>document.querySelector(s);
+    const API='/api';
+
+    function showError(msg){const e=$('#loginError');e.textContent=msg;e.style.display='block'}
+    function hideError(){$('#loginError').style.display='none'}
+
+    // ===== Login / Register =====
+    async function doLogin(email, password) {
+      hideError();
+      try {
+        const r=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+        const d=await r.json();
+        if(d.error) return showError(d.error);
+        TOKEN=d.token; USER=d.user; IS_MASTER=d.master||d.user?.role==='master';
+        localStorage.setItem('athena_token',TOKEN);
+        if(d.user) localStorage.setItem('athena_user',JSON.stringify(d.user));
+        IS_FREEMIUM=false;
+        afterLogin();
+      } catch(e){showError('Erro de conexão')}
+    }
+
+    async function doRegister(email, password) {
+      hideError();
+      try {
+        const r=await fetch(`${API}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+        const d=await r.json();
+        if(d.error) return showError(d.error);
+        TOKEN=d.token; USER=d.user;
+        localStorage.setItem('athena_token',TOKEN);
+        localStorage.setItem('athena_user',JSON.stringify(d.user));
+        IS_FREEMIUM=false; IS_MASTER=false;
+        afterLogin();
+      } catch(e){showError('Erro de conexão')}
+    }
+
+    $('#loginBtn').addEventListener('click',()=>{
+      const e=$('#loginEmail').value.trim(), p=$('#loginPassword').value.trim();
+      if(!e||!p) return showError('Preencha email e senha');
+      doLogin(e,p);
+    });
+
+    $('#loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()});
+    $('#loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()});
+
+    let isRegisterMode=false;
+    $('#showRegister').addEventListener('click',()=>{
+      isRegisterMode=true;
+      $('#showRegister').style.display='none';
+      $('#showLogin').style.display='block';
+      $('#loginBtn').textContent='📝 Cadastrar';
+      $('.freemium-badge').textContent='🎯 Crie sua conta gratuitamente';
+    });
+    $('#showLogin').addEventListener('click',()=>{
+      isRegisterMode=false;
+      $('#showLogin').style.display='none';
+      $('#showRegister').style.display='block';
+      $('#loginBtn').textContent='🔐 Entrar';
+      $('.freemium-badge').textContent='🎯 Teste grátis disponível';
+    });
+
+    // Override loginBtn for register
+    const origLoginClick=$('#loginBtn').click;
+    $('#loginBtn').addEventListener('click',async()=>{
+      const e=$('#loginEmail').value.trim(), p=$('#loginPassword').value.trim();
+      if(!e||!p) return showError('Preencha email e senha');
+      if(isRegisterMode) await doRegister(e,p);
+      else await doLogin(e,p);
+    });
+
+    // ===== Freemium / Teste Grátis =====
+    $('#freemiumBtn').addEventListener('click',()=>{
+      IS_FREEMIUM=true;
+      $('#loginScreen').classList.add('hidden');
+      $('#appContent').style.display='block';
+      SUB_REQUIRED=true;
+      addGlobalLog({agent:'system',level:'info',message:'🎮 Modo de demonstração ativado — comandos limitados'});
+      loadAll();
+    });
+
+    $('#freemiumTestBtn').addEventListener('click',async()=>{
+      const cmds=['analisar tendências de marketing','gerar relatório financeiro','simular cotação de frete'];
+      const cmd=cmds[Math.floor(Math.random()*cmds.length)];
+      addGlobalLog({agent:'console',level:'info',message:`🎮 Demo: "${cmd}"`});
+      try{
+        const r=await fetch(`${API}/mission`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd,source:'freemium'})});
+        const d=await r.json();
+        setTimeout(()=>{
+          $('#subModal').classList.add('active');
+          document.body.style.overflow='hidden';
+        },3000);
+      }catch(e){}
+    });
+
+    $('#freemiumSubBtn').addEventListener('click',()=>$('#subModal').classList.add('active'));
+
+    // Block copy/paste in demo mode
+    document.addEventListener('copy',e=>{if(IS_FREEMIUM){e.preventDefault();$('#subModal').classList.add('active')}});
+    document.addEventListener('contextmenu',e=>{if(IS_FREEMIUM){e.preventDefault();$('#subModal').classList.add('active')}});
+
+    // ===== Subscription =====
+    $('#subBtn').addEventListener('click',async()=>{
+      const email=$('#subEmail').value.trim()||USER?.email||'cliente@email.com';
+      try{
+        const r=await fetch(`${API}/checkout`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        const d=await r.json();
+        if(d.initPoint) window.open(d.initPoint,'_blank');
+        addGlobalLog({agent:'checkout',level:'success',message:`🛒 Checkout Mercado Pago criado para ${email}`});
+      }catch(e){addGlobalLog({agent:'checkout',level:'error',message:`❌ ${e.message}`})}
+    });
+
+    // Close sub modal
+    $('#subModal').addEventListener('click',e=>{if(e.target===e.currentTarget){$('#subModal').classList.remove('active');document.body.style.overflow=''}});
+
+    // ===== After Login =====
+    function afterLogin() {
+      $('#loginScreen').classList.add('hidden');
+      $('#appContent').style.display='block';
+      SUB_REQUIRED=false;
+
+      // Profile
+      $('#profileSection').classList.add('active');
+      $('#userEmail').textContent=USER?.email||'';
+      if(IS_MASTER) $('#adminLink').style.display='inline';
+
+      loadAll();
+      loadBranding();
+    }
+
+    // ===== Branding =====
+    async function loadBranding(){
+      if(!USER?.tenant_uuid) return;
+      try{
+        const r=await fetch(`${API}/branding/${USER.tenant_uuid}`);
+        const b=await r.json();
+        if(b.company_name&&b.company_name!=='Athena IA'){
+          document.documentElement.style.setProperty('--primary',b.primary_color||'#7c3aed');
+          document.documentElement.style.setProperty('--secondary',b.secondary_color||'#3b82f6');
+          const brand=$('#companyBrand');
+          brand.style.display='flex';
+          $('#brandName').textContent=b.company_name;
+          if(b.logo_url) $('#brandLogo').src=b.logo_url;
+        }
+      }catch(e){}
+    }
+
+    // ===== CPF/CNPJ Config =====
+    $('#cfgDocBtn').addEventListener('click',async()=>{
+      const doc=$('#cfgDoc').value.trim();
+      if(!doc) return;
+      try{
+        const r=await fetch(`${API}/branding/lookup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document:doc})});
+        const d=await r.json();
+        if(d.error) return $('#cfgDocResult').innerHTML=`<span style="color:#ef4444">${d.error}</span>`;
+        $('#cfgDocResult').innerHTML=`
+          <div style="margin-bottom:8px">✅ ${d.type==='cpf'?'CPF':'CNPJ'} válido</div>
+          <div style="margin-bottom:4px"><strong>Empresa:</strong> ${d.company_name}</div>
+          <div style="margin-bottom:4px"><strong>Cor primária:</strong> <span style="background:${d.primary_color};padding:2px 8px;border-radius:4px">${d.primary_color}</span></div>
+          <div style="margin-bottom:4px"><strong>Logo:</strong> <img src="${d.logo_url}" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"></div>
+          <button class="btn btn-sm" style="margin-top:6px" onclick="applyBranding('${d.company_name}','${d.primary_color}','${d.secondary_color}','${d.logo_url}','${d.document}')">Aplicar Personalização</button>
+        `;
+      }catch(e){$('#cfgDocResult').textContent='Erro ao consultar documento'}
+    });
+
+    window.applyBranding=async function(name,pc,sc,logo,doc){
+      document.documentElement.style.setProperty('--primary',pc);
+      document.documentElement.style.setProperty('--secondary',sc);
+      $('#companyBrand').style.display='flex';
+      $('#brandName').textContent=name;
+      $('#brandLogo').src=logo;
+      try{
+        await fetch(`${API}/branding/save`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenant_uuid:USER?.tenant_uuid,company_name:name,primary_color:pc,secondary_color:sc,logo_url:logo,cpf_cnpj:doc})});
+        addGlobalLog({agent:'branding',level:'success',message:`🎨 Personalização aplicada: ${name}`});
+      }catch(e){}
+    };
+
+    // ===== Logout =====
+    $('#logoutBtn').addEventListener('click',()=>{
+      localStorage.removeItem('athena_token');
+      localStorage.removeItem('athena_user');
+      TOKEN=''; USER=null; IS_MASTER=false;
+      location.reload();
+    });
+
+    // ===== Navigation =====
+    $$('.nav-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
         $$('.nav-btn').forEach(b=>b.classList.remove('active'));
         $$('.tab').forEach(t=>t.classList.remove('active'));
         btn.classList.add('active');
@@ -283,302 +503,233 @@
       });
     });
 
-    // Chart Init
+    // ===== Auto-login check =====
+    (async function init(){
+      if(TOKEN){
+        try{
+          const r=await fetch(`${API}/auth/me`,{headers:{'Authorization':`Bearer ${TOKEN}`}});
+          if(r.ok){
+            const d=await r.json();
+            USER=d; IS_MASTER=d.isMaster||d.role==='master';
+            IS_FREEMIUM=false;
+            afterLogin();
+            return;
+          }
+        }catch(e){}
+        localStorage.removeItem('athena_token');
+        TOKEN='';
+      }
+      // Show login
+      $('#loginScreen').classList.remove('hidden');
+
+      // Check URL params for checkout
+      const p=new URLSearchParams(location.search);
+      if(p.get('checkout')==='success'){
+        $('#loginEmail').value='';
+        $('#loginPassword').value='';
+        $('.freemium-badge').textContent='✅ Pagamento confirmado! Faça login para acessar.';
+      }
+    })();
+
+    // ===== Shared functions =====
+    let effChart=null, convChart=null, currentLeadId=null;
     const agentColors={orchestrator:'#7c3aed',marketing:'#ec4899',financial:'#f59e0b',accounting:'#10b981',legal:'#3b82f6',logistics:'#8b5cf6',hr:'#06b6d4',helpdesk:'#f43f5e',project:'#14b8a6'};
 
-    function initCharts(){
-      const ctx1=document.getElementById('effChart')?.getContext('2d');
-      if(ctx1) effChart=new Chart(ctx1,{
-        type:'bar',data:{labels:[],datasets:[{label:'%',data:[],backgroundColor:[],borderRadius:4,borderSkipped:false}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{y:{min:80,max:100,grid:{color:'#1a1a2a'},ticks:{color:'#666',font:{size:8}}},x:{grid:{display:false},ticks:{color:'#888',font:{size:8}}}}}
-      });
-      const ctx2=document.getElementById('convChart')?.getContext('2d');
-      if(ctx2) convChart=new Chart(ctx2,{
-        type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:9},padding:8}}}}
-      });
+    function authHeaders(){
+      const h={'Content-Type':'application/json'};
+      if(TOKEN) h['Authorization']=`Bearer ${TOKEN}`;
+      return h;
     }
 
-    // Add log
-    function addLog(containerId, entry){
+    function addLog(containerId,entry){
       const c=document.getElementById(containerId)||$('#dashLogs');
-      if(!c) return;
-      const t=new Date().toLocaleTimeString(), lvl=entry.level||'info';
-      const d=document.createElement('div'); d.className='log-entry';
+      if(!c)return;
+      const t=new Date().toLocaleTimeString(),lvl=entry.level||'info';
+      const d=document.createElement('div');d.className='log-entry';
       d.innerHTML=`<span class="log-time">[${t}]</span> <span class="log-${lvl}">${entry.agent?'['+entry.agent+'] ':''}${entry.message||''}</span>`;
-      c.appendChild(d); c.scrollTop=c.scrollHeight;
+      c.appendChild(d);c.scrollTop=c.scrollHeight;
     }
+    function addGlobalLog(e){addLog('dashLogs',e);addLog('agentLogs',e)}
 
-    function addGlobalLog(entry){
-      addLog('dashLogs', entry);
-      addLog('agentLogs', entry);
-    }
-
-    // Render agents
-    function renderAgents(agents){
-      const grid=document.getElementById('agentsGrid');
-      if(!grid)return;
-      grid.innerHTML=agents.map(a=>
-        `<div class="agent-card" style="border-left:3px solid ${agentColors[a.id]||'#7c3aed'}">
-          <div class="agent-name">${a.icon||'🤖'} ${a.name}</div>
-          <div class="agent-spec">${a.specialty||''}</div>
-          <div class="agent-s">
-            <span class="agent-sl ${a.tasksCompleted>0&&a.status!=='idle'?'busy':''}">${a.tasksCompleted>0&&a.status!=='idle'?'⚡ Ativo':'💤 Ocioso'}</span>
-            <span class="agent-eff">${Math.round(a.efficiency||0)}%</span>
-          </div>
-          <div class="agent-tasks">${a.tasksCompleted||0} tarefas</div>
-        </div>`
-      ).join('');
-      if(effChart){
-        effChart.data.labels=agents.map(a=>a.name?.split(' ').pop()||a.id);
-        effChart.data.datasets[0].data=agents.map(a=>Math.round(a.efficiency||0));
-        effChart.data.datasets[0].backgroundColor=agents.map(a=>agentColors[a.id]||'#7c3aed');
-        effChart.update();
+    async function loadAll(){
+      loadStatus();loadMissions();loadCRM();loadOAuth();loadAgentFilter();connectSSE();
+      setInterval(loadStatus,5000);setInterval(loadMissions,15000);setInterval(loadCRM,20000);
+      // Config page
+      if(USER){
+        $('#cfgEmail').textContent=USER.email||'-';
+        $('#cfgTenant').textContent=USER.tenant_uuid||'-';
+        $('#cfgPlan').textContent=IS_MASTER?'Master':SUB_REQUIRED?'Demo':'Ativo';
       }
     }
 
-    // SSE
+    async function loadStatus(){
+      try{
+        const r=await fetch(`${API}/status`,{headers:authHeaders()});
+        const s=await r.json();
+        for(const[k,v]of Object.entries({stAgents:s.agents,stActive:s.active,stCycle:s.engineCycle}))
+          {const el=document.getElementById(k);if(el)el.textContent=v??'-';}
+        for(const[k,v]of Object.entries({mTasks:s.totalTasks,mActive:s.active,mMissions:s.totalMissions,mUptime:s.uptimeDisplay||'0s'}))
+          {const el=document.getElementById(k);if(el)el.textContent=v??'0';}
+        if(s.authenticated&&!IS_FREEMIUM&&!IS_MASTER&&!SUB_REQUIRED){
+          const fb=document.getElementById('freemiumBar');
+          if(fb)fb.style.display='none';
+        }
+      }catch{}
+    }
+
+    async function loadMissions(){
+      try{
+        const r=await fetch(`${API}/missions?limit=5`,{headers:authHeaders()});
+        const ms=await r.json();
+        if(!ms.length)return;
+        const list=$('#missionsList');if(!list)return;
+        list.innerHTML=ms.slice(0,8).map(m=>`<div class="mission-item"><span class="mission-cmd">#${m.id} ${(m.command||'').slice(0,50)}</span><span class="mission-st ${m.status}">${m.status==='processing'?'⚡':'✅'}</span></div>`).join('');
+      }catch{}
+    }
+
+    async function sendMission(){
+      const inp=$('#cmdInput'),btn=$('#sendBtn'),cmd=inp.value.trim();
+      if(!cmd)return;
+      if(IS_FREEMIUM){$('#subModal').classList.add('active');return}
+      if(SUB_REQUIRED){$('#subModal').classList.add('active');return}
+      btn.disabled=true;btn.textContent='⏳';
+      try{
+        await fetch(`${API}/mission`,{method:'POST',headers:authHeaders(),body:JSON.stringify({command:cmd})});
+        addGlobalLog({agent:'console',level:'info',message:`🚀 Missão: "${cmd}"`});
+        inp.value='';
+      }catch(e){addGlobalLog({agent:'system',level:'error',message:`❌ ${e.message}`})}
+      btn.disabled=false;btn.textContent='🚀 Executar';
+    }
+
+    $('#sendBtn').addEventListener('click',sendMission);
+    $('#cmdInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMission()});
+
+    // ===== SSE =====
     function connectSSE(){
       const es=new EventSource('/api/stream');
-      es.addEventListener('connected',()=>{ addGlobalLog({agent:'system',level:'success',message:'🔗 Conectado ao motor 24/7'}); });
+      es.addEventListener('connected',()=>addGlobalLog({agent:'system',level:'success',message:'🔗 Conectado'}));
       es.addEventListener('log',e=>{try{addGlobalLog(JSON.parse(e.data))}catch{}});
       es.addEventListener('agent-update',e=>{try{renderAgents(JSON.parse(e.data));loadStatus()}catch{}});
       es.addEventListener('reasoning',e=>{
-        try{
-          const d=JSON.parse(e.data);
-          const box=$('#reasoningBox');
-          if(box&&d.steps) box.innerHTML='<div style="color:#7c3aed;margin-bottom:4px;font-weight:600">🧠 Plano de Raciocínio</div>'+d.steps.map((s,i)=>`<div>📌 ${s.agent} → ${s.description?.slice(0,60)}</div>`).join('');
-        }catch{}
+        try{const d=JSON.parse(e.data);const box=$('#reasoningBox');
+        if(box&&d.steps) box.innerHTML='<div style="color:var(--primary);margin-bottom:4px;font-weight:600">🧠 Plano</div>'+d.steps.map((s,i)=>`<div>📌 ${s.agent} → ${(s.description||'').slice(0,60)}</div>`).join('')}catch{}
       });
       es.addEventListener('mission-start',e=>{try{const d=JSON.parse(e.data);updateMissionList(d)}catch{}});
       es.addEventListener('mission-done',e=>{try{addGlobalLog({agent:'system',level:'success',message:'🏁 Missão concluída!'});loadMissions();loadStatus()}catch{}});
       es.addEventListener('crm-update',e=>{try{loadCRM();loadStatus()}catch{}});
-      es.addEventListener('heartbeat',e=>{
-        try{
-          const d=JSON.parse(e.data);
-          const el=document.getElementById('st-cycle');
-          if(el&&d.cycle) el.textContent=d.cycle;
-        }catch{}
-      });
+      es.addEventListener('heartbeat',e=>{try{const d=JSON.parse(e.data);const el=$('#st-cycle');if(el&&d.cycle)el.textContent=d.cycle}catch{}});
       es.onerror=()=>{setTimeout(connectSSE,3000)};
     }
 
-    // Load status
-    async function loadStatus(){
-      try{
-        const r=await fetch('/api/status'); const s=await r.json();
-        for(const[k,v]of Object.entries({stAgents:s.agents,stActive:s.active,stMissions:s.totalMissions,stCycle:s.engineCycle,stUptime:s.uptimeDisplay||s.uptime+'s',stDb:s.dbConnected?'DB':'MEM'}))
-          {const el=document.getElementById(k);if(el)el.textContent=v??'-';}
-        for(const[k,v]of Object.entries({mTasks:s.totalTasks,mActive:s.active,mMissions:s.totalMissions,mUptime:s.uptimeDisplay||'0s'}))
-          {const el=document.getElementById(k);if(el)el.textContent=v??'0';}
-      }catch{}
-    }
-
-    // Load missions
-    async function loadMissions(){
-      try{
-        const r=await fetch('/api/missions?limit=10'); const ms=await r.json();
-        if(!ms.length) return;
-        const list=document.getElementById('missionsList'); if(!list) return;
-        list.innerHTML=ms.map(m=>
-          `<div class="mission-item"><span class="mission-cmd">#${m.id} ${m.command?.slice(0,60)}</span><span class="mission-st ${m.status}">${m.status==='processing'?'⚡':'✅'}</span></div>`
-        ).join('');
-      }catch{}
-    }
-
     function updateMissionList(m){
-      const list=document.getElementById('missionsList');
-      if(!list)return;
+      const list=$('#missionsList');if(!list)return;
       const first=list.querySelector('.mission-item');
-      const d=document.createElement('div'); d.className='mission-item';
-      d.innerHTML=`<span class="mission-cmd">#${m.id} ${(m.command||'').slice(0,60)}</span><span class="mission-st processing">⚡</span>`;
-      if(first)list.insertBefore(d,first); else list.prepend(d);
+      const d=document.createElement('div');d.className='mission-item';
+      d.innerHTML=`<span class="mission-cmd">#${m.id} ${(m.command||'').slice(0,50)}</span><span class="mission-st processing">⚡</span>`;
+      if(first)list.insertBefore(d,first);else list.prepend(d);
     }
 
-    // Send mission
-    async function sendMission(){
-      const inp=$('#cmdInput'), btn=$('#sendBtn'), cmd=inp.value.trim();
-      if(!cmd)return;
-      btn.disabled=true; btn.textContent='⏳';
-      try{
-        await fetch('/api/mission',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})});
-        addGlobalLog({agent:'console',level:'info',message:`🚀 Missão: "${cmd}"`});
-        inp.value='';
-      }catch(e){addGlobalLog({agent:'system',level:'error',message:`❌ ${e.message}`})}
-      btn.disabled=false; btn.textContent='🚀 Executar';
+    function renderAgents(agents){
+      const grid=$('#agentsGrid');if(!grid)return;
+      grid.innerHTML=agents.map(a=>`<div class="agent-card" style="border-left:3px solid ${agentColors[a.id]||'var(--primary)'}">
+        <div class="agent-name">${a.icon||'🤖'} ${a.name||a.id}</div>
+        <div class="agent-spec">${a.specialty||''}</div>
+        <div class="agent-s"><span class="agent-sl ${a.tasksCompleted>0?'busy':''}">${a.tasksCompleted>0?'⚡ Ativo':'💤 Ocioso'}</span><span class="agent-eff">${Math.round(a.efficiency||0)}%</span></div>
+        <div class="agent-tasks">${a.tasksCompleted||0} tarefas</div></div>`).join('');
+      if(effChart){
+        effChart.data.labels=agents.map(a=>a.name?.split(' ').pop()||a.id);
+        effChart.data.datasets[0].data=agents.map(a=>Math.round(a.efficiency||0));
+        effChart.data.datasets[0].backgroundColor=agents.map(a=>agentColors[a.id]||'var(--primary)');
+        effChart.update();
+      }
     }
 
     // ===== CRM =====
     async function loadCRM(){
       try{
-        const r=await fetch('/api/crm/pipeline'); const data=await r.json();
+        const r=await fetch(`${API}/crm/pipeline`,{headers:authHeaders()});
+        const data=await r.json();
         const stages=data.stages||[], stats=data.stats||[];
-        const container=document.getElementById('pipelineContainer'); if(!container)return;
+        const container=$('#pipelineContainer');if(!container)return;
         container.innerHTML='';
-
         for(const s of stages){
-          const col=document.createElement('div'); col.className='pipeline-col';
+          const col=document.createElement('div');col.className='pipeline-col';
           const stat=stats.find(st=>st.id===s.id)||{count:0,avgScore:0};
-          col.innerHTML=
-            `<div class="pipeline-h" style="color:${s.color}"><span>${s.icon} ${s.label}</span><span class="count">${stat.count} | ${stat.avgScore}pts</span></div>`;
+          col.innerHTML=`<div class="pipeline-h" style="color:${s.color}"><span>${s.icon} ${s.label}</span><span class="count">${stat.count}</span></div>`;
           container.appendChild(col);
-
-          // Load leads for this stage
           try{
-            const lr=await fetch(`/api/crm/leads?stage=${s.id}`); const leads=await lr.json();
-            if(leads.length){
-              leads.slice(0,8).forEach(l=>{
-                const card=document.createElement('div'); card.className='lead-card';
-                card.innerHTML=
-                  `<div class="lead-name">${l.name||'Sem nome'}</div>
-                  <div class="lead-source">${l.source||''}${l.email?' · '+l.email.slice(0,20):''}</div>
-                  <span class="lead-score ${(l.score||0)>=70?'high':''}">🎯 ${l.score||0}</span>`;
-                card.addEventListener('click',()=>openLeadDetail(l.id));
-                col.appendChild(card);
-              });
-            } else {
-              const empty=document.createElement('div'); empty.style.cssText='color:#555;font-size:10px;padding:8px';
-              empty.textContent='Nenhum lead'; col.appendChild(empty);
-            }
+            const lr=await fetch(`${API}/crm/leads?stage=${s.id}`,{headers:authHeaders()});
+            const leads=await lr.json();
+            if(leads.length) leads.slice(0,6).forEach(l=>{
+              const card=document.createElement('div');card.className='lead-card';
+              card.innerHTML=`<div class="lead-name">${l.name||'Lead'}</div><div class="lead-source">${l.source||''}</div><span class="lead-score">🎯 ${l.score||0}</span>`;
+              col.appendChild(card);
+            });else{const e=document.createElement('div');e.style.cssText='color:#555;font-size:9px;padding:6px';e.textContent='Vazio';col.appendChild(e)}
           }catch{}
         }
-
-        // Lead count
-        const totalLeads=stats.reduce((s,st)=>s+st.count,0);
-        const lc=document.getElementById('crmLeadCount'); if(lc) lc.textContent=`${totalLeads} leads`;
-
-        // Conversion chart
         if(convChart){
-          convChart.data.labels=stats.filter(s=>s.count>0).map(s=>s.label);
-          convChart.data.datasets[0].data=stats.filter(s=>s.count>0).map(s=>s.count);
-          convChart.data.datasets[0].backgroundColor=stats.filter(s=>s.count>0).map(s=>s.color);
+          const filtered=stats.filter(s=>s.count>0);
+          convChart.data.labels=filtered.map(s=>s.label);
+          convChart.data.datasets[0].data=filtered.map(s=>s.count);
+          convChart.data.datasets[0].backgroundColor=filtered.map(s=>s.color);
           convChart.update();
         }
-
-        // Top leads
-        const tl=document.getElementById('topLeads');
-        if(tl){
-          const allR=await fetch('/api/crm/leads'); const all=await allR.json();
-          const top=(all||[]).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
-          tl.innerHTML=top.length?top.map(l=>`<div style="padding:4px 0;border-bottom:1px solid #0d0d18"><strong>${l.name||'?'}</strong> 🎯 ${l.score||0} · ${l.stage||'lead'}</div>`).join(''):'Nenhum lead cadastrado';
-        }
-      }catch(e){console.error('CRM load error:',e)}
+      }catch{}
     }
-
-    // Lead detail
-    async function openLeadDetail(id){
-      currentLeadId=id;
-      try{
-        const r=await fetch(`/api/crm/leads/${id}`); const l=await r.json();
-        if(!l)return;
-        document.getElementById('ld-name').textContent=`${l.name||'Lead'} (${l.email||'sem email'})`;
-        document.getElementById('ld-meta').textContent=`Origem: ${l.source||'-'} · ${l.interactionCount||0} interações · ${l.stage||'lead'}`;
-        const scoreEl=document.getElementById('ld-score');
-        scoreEl.textContent=`🎯 ${l.score||0} pontos`;
-        scoreEl.className=`lead-score ${(l.score||0)>=70?'high':''}`;
-
-        // Interactions
-        const ic=document.getElementById('ld-interactions');
-        if(l.interactions?.length){
-          ic.innerHTML=l.interactions.slice(0,10).map(i=>
-            `<div class="interaction-item">[${new Date(i.created_at).toLocaleString('pt-BR')}] ${i.channel||i.type} ${i.direction==='outbound'?'→':'←'}: ${(i.content||'').slice(0,100)}</div>`
-          ).join('');
-        } else ic.innerHTML='<div style="color:#666">Nenhuma interação</div>';
-
-        // Follow-ups
-        const fc=document.getElementById('ld-followups');
-        if(l.followUps?.length){
-          fc.innerHTML=l.followUps.slice(0,5).map(f=>
-            `<div class="followup-item">${f.status==='sent'?'✅':'⏳'} ${(f.message||'').slice(0,80)}...</div>`
-          ).join('');
-        } else fc.innerHTML='<div style="color:#666">Nenhum follow-up</div>';
-
-        $('#leadModal').classList.add('active');
-      }catch(e){console.error(e)}
-    }
-
-    document.getElementById('leadModalClose').addEventListener('click',()=>$('#leadModal').classList.remove('active'));
-    $('#leadModal').addEventListener('click',e=>{if(e.target===e.currentTarget)$('#leadModal').classList.remove('active')});
-    document.getElementById('ld-followup-btn')?.addEventListener('click',async()=>{
-      if(!currentLeadId)return;
-      try{
-        await fetch(`/api/crm/leads/${currentLeadId}/followup`,{method:'POST'});
-        addGlobalLog({agent:'crm',level:'success',message:`📬 Follow-up agendado para lead #${currentLeadId}`});
-        openLeadDetail(currentLeadId);
-      }catch(e){addGlobalLog({agent:'crm',level:'error',message:`❌ ${e.message}`})}
-    });
 
     // ===== OAuth2 =====
     async function loadOAuth(){
       try{
-        const r=await fetch('/api/oauth/status'); const data=await r.json();
+        const r=await fetch(`${API}/oauth/status`,{headers:authHeaders()});
+        const data=await r.json();
         const conns=data.connections||[];
-        const grid=document.getElementById('socialGrid'); if(!grid) return;
-        grid.innerHTML=conns.map(c=>
-          `<div class="social-card">
-            <div class="social-icon">${c.icon||'🔌'}</div>
-            <div class="social-name">${c.name||c.id}</div>
-            <div><span class="social-status ${c.connected?'connected':'disconnected'}">${c.connected?'✅ Conectado':'❌ Desconectado'}</span></div>
-            ${c.connected
-              ? `<button class="btn btn-sm social-btn" onclick="disconnectOAuth('${c.id}')">Desconectar</button>`
-              : `<button class="btn btn-sm social-btn" onclick="connectOAuth('${c.id}')">${c.configured?'🔗 Conectar':'⚙️ Configurar'}</button>`
-            }
-          </div>`
-        ).join('');
-
-        // Webhook status
-        try{
-          const wr=await fetch('/api/webhooks/status'); const wd=await wr.json();
-          const ws=document.getElementById('webhookStatus');
-          if(ws&&wd.platforms) ws.innerHTML=wd.platforms.map(p=>
-            `<div style="padding:4px 0;border-bottom:1px solid #0d0d18;font-size:11px">${p.icon||'🔗'} <strong>${p.name}</strong> <code style="float:right;color:#555;font-size:9px">${p.webhookUrl}</code></div>`
-          ).join('');
-        }catch{}
-      }catch(e){console.error(e)}
+        const grid=$('#socialGrid');if(!grid)return;
+        grid.innerHTML=conns.map(c=>`<div class="social-card">
+          <div class="social-icon">${c.icon||'🔌'}</div>
+          <div class="social-name">${c.name||c.id}</div>
+          <div><span class="social-status ${c.connected?'connected':'disconnected'}">${c.connected?'✅ Conectado':'❌ Desconectado'}</span></div>
+          ${c.connected?`<button class="btn btn-sm btn-outline" onclick="disconnectOAuth('${c.id}')">Desconectar</button>`
+          :`<button class="btn btn-sm" onclick="connectOAuth('${c.id}')">${c.configured?'🔗 Conectar':'⚙️'}</button>`}
+        </div>`).join('');
+      }catch{}
     }
+    window.connectOAuth=function(p){window.open(`/api/oauth/${p}/login`,'_blank')};
+    window.disconnectOAuth=async function(p){await fetch(`/api/oauth/${p}/disconnect`,{method:'POST',headers:authHeaders()});loadOAuth()};
 
-    window.connectOAuth=function(platform){
-      window.open(`/api/oauth/${platform}/login`,'_blank');
-      addGlobalLog({agent:'oauth2',level:'info',message:`🔐 Redirecionando para login ${platform}...`});
-    };
-    window.disconnectOAuth=async function(platform){
-      await fetch(`/api/oauth/${platform}/disconnect`,{method:'POST'});
-      addGlobalLog({agent:'oauth2',level:'info',message:`🔌 ${platform} desconectado`});
-      loadOAuth();
-    };
-
-    // ===== Agent Filter Bar =====
+    // ===== Agent Filter =====
     async function loadAgentFilter(){
       try{
-        const r=await fetch('/api/agents'); const agents=await r.json();
-        const bar=document.getElementById('agentFilterBar'); if(!bar)return;
-        bar.innerHTML=agents.map(a=>
-          `<div class="card" style="padding:8px;text-align:center;cursor:pointer" onclick="addGlobalLog({agent:'${a.id||'agent'}',level:'info',message:'📊 ${a.name||a.id}: ${a.tasksCompleted||0} tarefas completadas | Eficiência: ${Math.round(a.efficiency||0)}%'})">
-            <div style="font-size:16px">${a.icon||'🤖'}</div>
-            <div style="font-size:9px;font-weight:600;margin-top:2px">${a.name||a.id}</div>
-            <div style="font-size:8px;color:#888">${a.tasksCompleted||0} tasks</div>
-          </div>`
-        ).join('');
+        const r=await fetch(`${API}/agents`,{headers:authHeaders()});
+        const agents=await r.json();
+        const bar=$('#agentFilterBar');if(!bar)return;
+        bar.innerHTML=agents.map(a=>`<div class="card" style="padding:6px;text-align:center;cursor:pointer" onclick="addGlobalLog({agent:'${a.id||'agent'}',level:'info',message:'📊 ${a.name||a.id}: ${a.tasksCompleted||0} tarefas'})">
+          <div style="font-size:14px">${a.icon||'🤖'}</div><div style="font-size:8px;font-weight:600;margin-top:2px">${a.name||a.id}</div></div>`).join('');
       }catch{}
     }
 
-    // ===== Events =====
-    $('#sendBtn').addEventListener('click',sendMission);
-    $('#cmdInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMission()});
+    // ===== Init Charts =====
+    (function initCharts(){
+      const ctx1=$('#effChart')?.getContext('2d');
+      if(ctx1) effChart=new Chart(ctx1,{
+        type:'bar',data:{labels:[],datasets:[{label:'%',data:[],backgroundColor:[],borderRadius:4,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:80,max:100,grid:{color:'#1a1a2a'},ticks:{color:'#666',font:{size:8}}},x:{grid:{display:false},ticks:{color:'#888',font:{size:8}}}}}
+      });
+      const ctx2=$('#convChart')?.getContext('2d');
+      if(ctx2) convChart=new Chart(ctx2,{
+        type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:8},padding:6}}}}
+      });
+    })();
 
-    // ===== Init =====
-    initCharts();
-    loadStatus();
-    loadMissions();
-    loadCRM();
-    loadOAuth();
-    loadAgentFilter();
-    connectSSE();
-
-    setInterval(loadStatus,5000);
-    setInterval(loadMissions,15000);
-    setInterval(loadCRM,20000);
+    // ===== Handle URL params =====
+    (function checkURL(){
+      const p=new URLSearchParams(location.search);
+      if(p.get('checkout')==='success'&&TOKEN){
+        addGlobalLog({agent:'checkout',level:'success',message:'✅ Pagamento confirmado!'});
+        setTimeout(()=>location.search='',5000);
+      }
+    })();
   </script>
 </body>
 </html>

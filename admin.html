@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Athena IA — Painel Administrativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08080d;color:#ddd}
+    .header{background:linear-gradient(135deg,#0d0d15,#151525);border-bottom:1px solid #f59e0b;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-size:20px;font-weight:800;background:linear-gradient(135deg,#f59e0b,#dc2626);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .master-badge{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#f59e0b;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+    .main{max-width:1200px;margin:0 auto;padding:24px}
+    .card{background:#11111a;border:1px solid #1a1a2a;border-radius:12px;padding:20px;margin-bottom:16px}
+    .card-title{font-size:12px;font-weight:600;color:#f59e0b;text-transform:uppercase;margin-bottom:14px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{text-align:left;padding:8px 6px;color:#888;border-bottom:1px solid #1a1a2a;font-size:10px;text-transform:uppercase}
+    td{padding:8px 6px;border-bottom:1px solid #0d0d18}
+    .btn{background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:10px;font-weight:600;cursor:pointer}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 2px 10px rgba(245,158,11,.4)}
+    .status-active{color:#34d399;font-weight:600}
+    .status-pending{color:#f59e0b;font-weight:600}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .metric{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:16px;text-align:center}
+    .metric-value{font-size:28px;font-weight:700;color:#f59e0b}
+    .metric-label{font-size:10px;color:#888;margin-top:4px;text-transform:uppercase}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">ATHENA IA — ADMIN</div>
+    <div><span class="master-badge">🔑 Acesso Master</span></div>
+  </div>
+  <div class="main">
+    <div class="metrics" id="metrics"></div>
+    <div class="card">
+      <div class="card-title">👥 Usuários Cadastrados</div>
+      <table><thead><tr><th>ID</th><th>Email</th><th>Nome</th><th>Role</th><th>Plano</th><th>Tenant UUID</th><th>Criado em</th><th>Ação</th></tr></thead><tbody id="usersTable"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-title">🔑 Contas Master</div>
+      <table><thead><tr><th>Email</th><th>Nome</th><th>Acesso</th></tr></thead>
+      <tbody>
+        <tr><td>vpquintino@gmail.com</td><td>Victor Quintino</td><td><span class="status-active">✅ Irrestrito</span></td></tr>
+        <tr><td>armarinhodajack@gmail.com</td><td>Armarinho da Jack</td><td><span class="status-active">✅ Irrestrito</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let token = '';
+
+    async function init() {
+      const saved = localStorage.getItem('athena_admin_token');
+      if (saved) {
+        token = saved;
+        await loadAdmin();
+      } else {
+        const email = prompt('Email Master:');
+        const password = prompt('Senha Master:');
+        if (!email || !password) return;
+        try {
+          const r = await fetch(`${API}/auth/login`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({email, password})
+          });
+          const d = await r.json();
+          if (d.token) {
+            token = d.token;
+            localStorage.setItem('athena_admin_token', token);
+            await loadAdmin();
+          } else {
+            alert('Erro: ' + (d.error || 'Credenciais inválidas'));
+          }
+        } catch(e) { alert('Erro de conexão'); }
+      }
+    }
+
+    async function loadAdmin() {
+      try {
+        const r = await fetch(`${API}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const stats = await r.json();
+        document.getElementById('metrics').innerHTML = `
+          <div class="metric"><div class="metric-value">${stats.totalUsers||0}</div><div class="metric-label">Total Usuários</div></div>
+          <div class="metric"><div class="metric-value" style="color:#34d399">${stats.activePlans||0}</div><div class="metric-label">Planos Ativos</div></div>
+          <div class="metric"><div class="metric-value" style="color:#f59e0b">${stats.pendingPlans||0}</div><div class="metric-label">Pendentes</div></div>
+        `;
+      } catch(e) { console.error(e); }
+
+      try {
+        const r = await fetch(`${API}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const users = await r.json();
+        const tbody = document.getElementById('usersTable');
+        if (users && users.length) {
+          tbody.innerHTML = users.map(u => `
+            <tr>
+              <td>${u.id}</td>
+              <td>${u.email||''}</td>
+              <td>${u.name||'-'}</td>
+              <td>${u.role||'user'}</td>
+              <td><span class="${u.plan_status==='active'?'status-active':'status-pending'}">${u.plan_status||'pending'}</span></td>
+              <td style="font-family:monospace;font-size:9px;color:#666">${(u.tenant_uuid||'').slice(0,8)}...</td>
+              <td style="font-size:10px;color:#666">${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '-'}</td>
+              <td>${u.role!=='master'?`<button class="btn" onclick="togglePlan(${u.id},'${u.plan_status}')">${u.plan_status==='active'?'❌ Desativar':'✅ Ativar'}</button>`:'🔑'}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="8" style="color:#666;text-align:center;padding:20px">Nenhum usuário cadastrado</td></tr>';
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    async function togglePlan(id, current) {
+      const newStatus = current === 'active' ? 'pending' : 'active';
+      try {
+        await fetch(`${API}/admin/users/${id}/plan`, {
+          method:'PATCH', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+          body: JSON.stringify({ plan_status: newStatus })
+        });
+        loadAdmin();
+      } catch(e) { alert('Erro: ' + e.message); }
+    }
+
+    init();
+  </script>
+</body>
+</html>
