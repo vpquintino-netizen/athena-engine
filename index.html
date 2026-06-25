@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Athena IA — Hyperautomation Engine</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;700;800&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#08080d;color:#ddd;min-height:100vh}
@@ -183,7 +183,14 @@
   <div id="appContent" style="display:none">
     <header class="header">
       <div class="h-left">
-        <div class="logo">ATHENA<span> IA</span></div>
+        <div class="brand-container" style="display:flex;align-items:center;gap:10px">
+          <div class="logo-wrapper" style="width:36px;height:36px;background:#0d0d15;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,242,254,0.15)">
+            <img src="/assets/athena-emblem-clean.svg" alt="Athena IA" style="width:85%;height:auto;filter:drop-shadow(0 0 4px #00f2fe)">
+          </div>
+          <span style="font-weight:700;font-size:16px;letter-spacing:.5px;color:#fff;text-transform:uppercase">
+            Athena <span style="background:linear-gradient(45deg,#00f2fe,#4facfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent">IA</span>
+          </span>
+        </div>
         <div class="badge-247"><span class="dot"></span> 24/7</div>
         <div id="companyBrand"><img id="brandLogo" alt=""><span id="brandName"></span></div>
       </div>

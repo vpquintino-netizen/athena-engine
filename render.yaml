@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: athena-engine-prod
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node setup-production.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: athena-postgres-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MERCADO_PAGO_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+
+databases:
+  - name: athena-postgres-db
+    plan: starter
+    databaseName: athena_db
+    user: athena_admin

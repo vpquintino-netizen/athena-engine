@@ -41,6 +41,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// ===== Health Check (monitoramento Render / UptimeRobot) =====
+app.get('/health', async (req, res) => {
+  try {
+    const dbOk = isDBReady();
+    if (dbOk) await query('SELECT NOW()');
+    res.status(200).json({
+      status: dbOk ? 'ONLINE' : 'DEGRADED',
+      timestamp: new Date().toISOString(),
+      database: dbOk ? 'CONNECTED' : 'MEMORY_FALLBACK',
+      orchestrator: 'RUNNING',
+      rpaEngine: 'ACTIVE',
+      uptime: process.uptime(),
+      uptimeDisplay: getUptime(),
+      version: '2.2.0',
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'DOWN', error: err.message });
+  }
+});
+
 // ===== Rotas públicas (sem auth) =====
 app.get('/api/status', (req, res) => {
   const stats = getAgentStats();

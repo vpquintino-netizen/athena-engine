@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4facfe;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#00f2fe" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="#0d0d15" stroke="url(#glow)" stroke-width="3" filter="url(#shadow)"/>
+  <circle cx="100" cy="100" r="75" fill="none" stroke="url(#glow)" stroke-width="0.8" opacity="0.3"/>
+  <text x="100" y="88" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="800" font-size="36" fill="url(#glow)">A</text>
+  <text x="100" y="128" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="300" font-size="14" fill="#888">ATHENA</text>
+  <polygon points="100,140 85,160 115,160" fill="url(#glow)" opacity="0.6"/>
+</svg>
