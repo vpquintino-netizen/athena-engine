@@ -3,566 +3,582 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Athena IA — Hiperautomação Multi-Agentes</title>
+  <title>Athena IA — Hyperautomation Engine</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0a0a0f;
-      color: #e0e0e0;
-      min-height: 100vh;
-    }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #12121a; }
-    ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08080d;color:#ddd;min-height:100vh;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:#12121a}
+    ::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:#3a3a4a}
 
-    .header {
-      background: linear-gradient(135deg, #0d0d15 0%, #151525 100%);
-      border-bottom: 1px solid #1e1e30;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
-      flex-wrap: wrap; gap: 10px;
-    }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-    .logo {
-      font-size: 20px; font-weight: 800;
-      background: linear-gradient(135deg, #7c3aed, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .logo span { -webkit-text-fill-color: #fff; }
+    .header{background:linear-gradient(135deg,#0d0d15,#151525);border-bottom:1px solid #1e1e30;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+    .h-left{display:flex;align-items:center;gap:12px}
+    .logo{font-size:18px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo span{-webkit-text-fill-color:#fff}
+    .badge-247{display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;font-weight:600}
+    .badge-247 .dot{width:5px;height:5px;border-radius:50%;background:#34d399;animation:pulse247 1.5s infinite}
+    @keyframes pulse247{0%,100%{opacity:1;box-shadow:0 0 4px #34d399}50%{opacity:.4;box-shadow:0 0 10px #34d399}}
+    .stats-bar{display:flex;gap:12px;font-size:10px;color:#777;flex-wrap:wrap}
+    .stats-bar strong{color:#bbb}
 
-    .badge {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 11px; padding: 4px 10px; border-radius: 20px;
-      font-weight: 600;
-    }
-    .badge-247 {
-      background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.3);
-      color: #34d399;
-    }
-    .badge-247 .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #34d399; animation: pulse247 1.5s infinite;
-    }
-    @keyframes pulse247 {
-      0%,100% { opacity: 1; box-shadow: 0 0 4px #34d399; }
-      50% { opacity: 0.4; box-shadow: 0 0 10px #34d399; }
-    }
-    .badge-mp {
-      background: rgba(0,174,239,0.1);
-      border: 1px solid rgba(0,174,239,0.3);
-      color: #00aeef;
-      cursor: pointer; transition: all .3s;
-    }
-    .badge-mp:hover { background: rgba(0,174,239,0.2); transform: translateY(-1px); }
+    .nav{display:flex;gap:2px;background:#0d0d15;padding:6px 20px;border-bottom:1px solid #1a1a2a;overflow-x:auto;position:sticky;top:57px;z-index:99}
+    .nav-btn{padding:8px 16px;font-size:12px;font-weight:600;border:none;background:transparent;color:#666;cursor:pointer;border-radius:8px;transition:all .3s;white-space:nowrap}
+    .nav-btn:hover{background:#1a1a2a;color:#ccc}
+    .nav-btn.active{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(59,130,246,.15));color:#a78bfa}
 
-    .stats-bar {
-      display: flex; gap: 14px; font-size: 11px; color: #888;
-      flex-wrap: wrap;
-    }
-    .stats-bar strong { color: #c0c0d0; }
+    .main{max-width:1440px;margin:0 auto;padding:16px}
+    .tab{display:none}
+    .tab.active{display:block}
 
-    .main { max-width: 1440px; margin: 0 auto; padding: 20px; }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .grid-full{grid-column:1/-1}
+    .grid-3{grid-template-columns:1fr 1fr 1fr}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .grid-full { grid-column: 1 / -1; }
-    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card{background:linear-gradient(145deg,#11111a,#0d0d15);border:1px solid #1a1a2a;border-radius:12px;padding:16px}
+    .card-title{font-size:11px;font-weight:600;color:#8888aa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .card-title .sub{font-weight:400;color:#555;text-transform:none;font-size:10px}
 
-    .card {
-      background: linear-gradient(145deg, #11111a, #0d0d15);
-      border: 1px solid #1a1a2a; border-radius: 12px; padding: 18px;
-    }
-    .card-title {
-      font-size: 12px; font-weight: 600; color: #8888aa;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 14px; display: flex;
-      align-items: center; justify-content: space-between;
-    }
-    .card-title .sub { font-weight:400; color:#555; text-transform:none; font-size:11px; }
+    .agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+    .agent-card{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:10px;transition:all .3s;cursor:pointer}
+    .agent-card:hover{border-color:#2a2a4e}
+    .agent-name{font-weight:600;font-size:12px;margin-bottom:2px}
+    .agent-spec{font-size:9px;color:#666;margin-bottom:6px}
+    .agent-s{display:flex;align-items:center;justify-content:space-between}
+    .agent-sl{font-size:9px;padding:2px 6px;border-radius:10px;background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+    .agent-sl.busy{background:rgba(234,179,8,.1);color:#eab308;border-color:rgba(234,179,8,.2)}
+    .agent-eff{font-size:10px;color:#888}
+    .agent-tasks{font-size:9px;color:#666;margin-top:3px}
 
-    .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-    .agent-card {
-      background: #0d0d18; border: 1px solid #1a1a2e;
-      border-radius: 10px; padding: 12px; transition: all .3s;
-    }
-    .agent-card:hover { border-color: #2a2a4e; }
-    .agent-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
-    .agent-spec { font-size: 10px; color: #666; margin-bottom: 8px; }
-    .agent-status { display: flex; align-items: center; justify-content: space-between; }
-    .agent-status-label {
-      font-size: 10px; padding: 2px 8px; border-radius: 10px;
-      background: rgba(34,197,94,0.1); color: #22c55e;
-      border: 1px solid rgba(34,197,94,0.2);
-    }
-    .agent-status-label.busy { background: rgba(234,179,8,0.1); color: #eab308; border-color: rgba(234,179,8,0.2); }
-    .agent-eff { font-size: 11px; color: #888; }
-    .agent-tasks { font-size: 10px; color: #666; margin-top: 4px; }
+    .console-area{display:flex;gap:8px}
+    .console-input{flex:1;background:#0a0a12;border:1px solid #1e1e30;border-radius:8px;padding:9px 12px;color:#ddd;font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:border-color .3s}
+    .console-input:focus{border-color:#7c3aed}
+    .console-input::placeholder{color:#444}
+    .btn{background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:8px;padding:9px 18px;color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all .3s;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(124,58,237,.4)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-sm{padding:6px 12px;font-size:10px}
 
-    .console-area { display: flex; gap: 10px; }
-    .console-input {
-      flex: 1; background: #0a0a12; border: 1px solid #1e1e30;
-      border-radius: 8px; padding: 10px 14px; color: #e0e0e0;
-      font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
-      transition: border-color .3s;
-    }
-    .console-input:focus { border-color: #7c3aed; }
-    .console-input::placeholder { color: #444; }
+    .log-container{height:200px;overflow-y:auto;font-family:'Courier New',monospace;font-size:10px;line-height:1.6;background:#050508;border:1px solid #1a1a2a;border-radius:8px;padding:8px;margin-top:8px}
+    .log-entry{padding:1px 0;border-bottom:1px solid #0a0a12}
+    .log-time{color:#555}
+    .log-info{color:#60a5fa}.log-debug{color:#888}.log-success{color:#34d399}.log-error{color:#f87171}.log-warn{color:#fbbf24}
 
-    .btn {
-      background: linear-gradient(135deg, #7c3aed, #6d28d9);
-      border: none; border-radius: 8px; padding: 10px 20px;
-      color: #fff; font-weight: 600; font-size: 13px;
-      cursor: pointer; transition: all .3s; white-space: nowrap;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-mp {
-      background: linear-gradient(135deg, #00aeef, #0077b6);
-    }
-    .btn-mp:hover { box-shadow: 0 4px 20px rgba(0,174,239,0.4); }
+    .chart-container{height:160px}
 
-    .log-container {
-      height: 260px; overflow-y: auto;
-      font-family: 'Courier New', monospace; font-size: 11px;
-      line-height: 1.6; background: #050508;
-      border: 1px solid #1a1a2a; border-radius: 8px; padding: 10px;
-    }
-    .log-entry { padding: 1px 0; border-bottom: 1px solid #0a0a12; }
-    .log-time { color: #555; }
-    .log-info { color: #60a5fa; }
-    .log-debug { color: #888; }
-    .log-success { color: #34d399; }
-    .log-error { color: #f87171; }
-    .log-warn { color: #fbbf24; }
+    .missions-list{max-height:160px;overflow-y:auto}
+    .mission-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #0d0d18;font-size:10px}
+    .mission-item:last-child{border:none}
+    .mission-cmd{color:#c0c0d0;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mission-st{padding:1px 6px;border-radius:10px;font-size:8px;font-weight:600}
+    .mission-st.processing{background:rgba(234,179,8,.1);color:#eab308}
+    .mission-st.completed{background:rgba(34,197,94,.1);color:#22c55e}
 
-    .chart-container { height: 180px; }
+    .reasoning-box{background:#050508;border:1px solid #1a1a2a;border-radius:8px;padding:8px;font-family:'Courier New',monospace;font-size:10px;line-height:1.8;min-height:40px;color:#a0a0b0}
 
-    .missions-list { max-height: 180px; overflow-y: auto; }
-    .mission-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 0; border-bottom: 1px solid #0d0d18; font-size: 11px;
-    }
-    .mission-item:last-child { border: none; }
-    .mission-cmd { color: #c0c0d0; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .mission-status { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; }
-    .mission-status.processing { background: rgba(234,179,8,0.1); color: #eab308; }
-    .mission-status.completed { background: rgba(34,197,94,0.1); color: #22c55e; }
+    .metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:14px}
+    .metric-card{background:#0d0d18;border:1px solid #1a1a2e;border-radius:10px;padding:10px;text-align:center}
+    .metric-value{font-size:18px;font-weight:700;color:#e0e0f0}
+    .metric-label{font-size:9px;color:#666;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
 
-    .reasoning-box {
-      background: #050508; border: 1px solid #1a1a2a;
-      border-radius: 8px; padding: 10px;
-      font-family: 'Courier New', monospace; font-size: 11px;
-      line-height: 1.8; min-height: 50px; color: #a0a0b0;
-    }
+    .pipeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;overflow-x:auto}
+    .pipeline-col{background:#0a0a12;border:1px solid #1a1a2e;border-radius:10px;padding:10px;min-height:200px}
+    .pipeline-h{font-size:11px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
+    .pipeline-h .count{font-size:9px;color:#888;background:#1a1a2a;padding:1px 6px;border-radius:8px}
+    .lead-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:8px;padding:8px;margin-bottom:6px;cursor:pointer;transition:all .3s}
+    .lead-card:hover{border-color:#3a3a5e}
+    .lead-name{font-size:11px;font-weight:600;color:#c0c0d0}
+    .lead-source{font-size:9px;color:#666;margin:2px 0}
+    .lead-score{font-size:9px;padding:1px 5px;border-radius:6px;background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);display:inline-block}
+    .lead-score.high{background:rgba(16,185,129,.1);color:#34d399;border-color:rgba(16,185,129,.2)}
 
-    .metric-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
-    .metric-card {
-      background: #0d0d18; border: 1px solid #1a1a2e;
-      border-radius: 10px; padding: 12px; text-align: center;
-    }
-    .metric-value { font-size: 22px; font-weight: 700; color: #e0e0f0; }
-    .metric-label { font-size: 10px; color: #666; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .social-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+    .social-card{background:#0d0d18;border:1px solid #1e1e30;border-radius:10px;padding:14px;text-align:center;transition:all .3s}
+    .social-card:hover{border-color:#3a3a5e}
+    .social-icon{font-size:28px;margin-bottom:6px}
+    .social-name{font-size:12px;font-weight:600;margin-bottom:4px}
+    .social-status{font-size:9px;padding:2px 8px;border-radius:10px;display:inline-block;margin:4px 0}
+    .social-status.connected{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+    .social-status.disconnected{background:rgba(107,114,128,.1);color:#888;border:1px solid rgba(107,114,128,.2)}
+    .social-btn{margin-top:8px;font-size:10px;padding:5px 12px}
 
-    /* Modal Checkout */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-      z-index: 1000; align-items: center; justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: #11111a; border: 1px solid #2a2a4e;
-      border-radius: 16px; padding: 32px; max-width: 440px;
-      width: 90%; position: relative;
-    }
-    .modal-close {
-      position: absolute; top: 12px; right: 16px;
-      background: none; border: none; color: #666;
-      font-size: 22px; cursor: pointer;
-    }
-    .modal-close:hover { color: #e0e0e0; }
-    .modal h2 { font-size: 20px; margin-bottom: 6px; }
-    .modal p { color: #888; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-    .modal .price {
-      font-size: 36px; font-weight: 800;
-      background: linear-gradient(135deg, #7c3aed, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 4px;
-    }
-    .modal .price-label { font-size: 12px; color: #888; margin-bottom: 20px; }
-    .modal .features { list-style: none; margin-bottom: 20px; }
-    .modal .features li { padding: 6px 0; font-size: 13px; color: #c0c0d0; }
-    .modal .features li:before { content: '✓ '; color: #34d399; font-weight: 700; }
-    .modal input {
-      width: 100%; background: #0a0a12; border: 1px solid #1e1e30;
-      border-radius: 8px; padding: 10px 14px; color: #e0e0e0;
-      font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
-      margin-bottom: 12px;
-    }
-    .modal input:focus { border-color: #7c3aed; }
-    .modal .btn { width: 100%; font-size: 15px; padding: 14px; }
+    /* CRM Lead Detail */
+    .lead-detail{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+    .lead-detail.active{display:flex}
+    .lead-detail-box{background:#11111a;border:1px solid #2a2a4e;border-radius:14px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+    .lead-detail-box h3{font-size:16px;margin-bottom:4px}
+    .lead-detail-box .close{float:right;background:none;border:none;color:#666;font-size:20px;cursor:pointer}
+    .lead-detail-box .close:hover{color:#eee}
+    .interaction-item{padding:6px 0;border-bottom:1px solid #0d0d18;font-size:11px}
+    .followup-item{padding:6px 0;border-bottom:1px solid #0d0d18;font-size:11px}
 
-    .tenants-grid { display: grid; gap: 8px; max-height: 180px; overflow-y: auto; }
-    .tenant-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 10px; background: #0d0d18; border-radius: 8px;
-      border: 1px solid #1a1a2e; font-size: 11px;
-    }
-    .tenant-status {
-      padding: 1px 8px; border-radius: 10px; font-size: 9px; font-weight: 600;
-    }
-    .tenant-status.active { background: rgba(34,197,94,0.1); color: #22c55e; }
-    .tenant-status.pending { background: rgba(234,179,8,0.1); color: #eab308; }
-
-    @media (max-width: 768px) {
-      .grid { grid-template-columns: 1fr; }
-      .grid-3 { grid-template-columns: 1fr; }
-      .header { flex-direction: column; align-items: flex-start; }
-      .stats-bar { gap: 8px; }
-      .metric-grid { grid-template-columns: repeat(2,1fr); }
+    @media(max-width:768px){
+      .grid,.grid-3,.grid-4{grid-template-columns:1fr}
+      .pipeline{grid-template-columns:1fr}
+      .nav{top:70px}
+      .header{flex-direction:column;align-items:flex-start}
     }
   </style>
 </head>
 <body>
   <header class="header">
-    <div class="header-left">
+    <div class="h-left">
       <div class="logo">ATHENA<span> IA</span></div>
-      <div class="badge badge-247"><span class="dot"></span> Operando 24/7</div>
-      <div class="badge badge-mp" id="btnShowCheckout">💰 Assinar — R$ 350/mês</div>
+      <div class="badge-247"><span class="dot"></span> 24/7</div>
     </div>
     <div class="stats-bar">
-      <span>🤖 <strong id="stat-agents">5</strong></span>
-      <span>⚡ <strong id="stat-active">0</strong></span>
-      <span>📦 <strong id="stat-missions">0</strong></span>
-      <span>✅ <strong id="stat-tasks">0</strong></span>
-      <span>⏱️ <strong id="stat-uptime">0s</strong></span>
-      <span>🗄️ <strong id="stat-db">MEM</strong></span>
-      <span>🔁 <strong id="stat-cycle">0</strong></span>
+      <span>🤖 <strong id="st-agents">-</strong></span>
+      <span>⚡ <strong id="st-active">-</strong></span>
+      <span>📦 <strong id="st-missions">-</strong></span>
+      <span>🔄 <strong id="st-cycle">-</strong></span>
+      <span>⏱️ <strong id="st-uptime">-</strong></span>
+      <span>🗄️ <strong id="st-db">-</strong></span>
     </div>
   </header>
 
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="dashboard">📊 Dashboard</button>
+    <button class="nav-btn" data-tab="crm">💼 CRM</button>
+    <button class="nav-btn" data-tab="oauth2">🔐 OAuth2</button>
+    <button class="nav-btn" data-tab="logs">📡 Logs</button>
+  </nav>
+
   <div class="main">
-    <!-- Métricas Rápidas -->
-    <div class="metric-grid" style="margin-bottom:16px">
-      <div class="metric-card"><div class="metric-value" id="m-tasks">0</div><div class="metric-label">Tarefas</div></div>
-      <div class="metric-card"><div class="metric-value" id="m-active">0</div><div class="metric-label">Ativos</div></div>
-      <div class="metric-card"><div class="metric-value" id="m-uptime">0s</div><div class="metric-label">Uptime</div></div>
-      <div class="metric-card"><div class="metric-value" id="m-tenants">0</div><div class="metric-label">Tenants</div></div>
-    </div>
+    <!-- TAB: DASHBOARD -->
+    <div class="tab active" id="tab-dashboard">
+      <div class="metric-grid" id="dashMetrics">
+        <div class="metric-card"><div class="metric-value" id="m-tasks">0</div><div class="metric-label">Tarefas</div></div>
+        <div class="metric-card"><div class="metric-value" id="m-active">0</div><div class="metric-label">Ativos</div></div>
+        <div class="metric-card"><div class="metric-value" id="m-missions">0</div><div class="metric-label">Missões</div></div>
+        <div class="metric-card"><div class="metric-value" id="m-uptime">0s</div><div class="metric-label">Uptime</div></div>
+      </div>
 
-    <!-- Console -->
-    <div class="grid">
+      <div class="grid">
+        <div class="card grid-full">
+          <div class="card-title">🎯 Comando <span class="sub">Delegue missões para os 8 agentes</span></div>
+          <div class="console-area">
+            <input type="text" class="console-input" id="cmdInput" placeholder='Ex: "analisar tendências de marketing e gerar relatório financeiro"' autofocus>
+            <button class="btn" id="sendBtn">🚀 Executar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">🤖 Agentes</div>
+          <div class="agents-grid" id="agentsGrid"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 Eficiência</div>
+          <div class="chart-container"><canvas id="effChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">🧠 Raciocínio</div>
+          <div class="reasoning-box" id="reasoningBox">Aguardando missão...</div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Missões</div>
+          <div class="missions-list" id="missionsList"><div style="color:#555;font-size:10px">Nenhuma</div></div>
+        </div>
+      </div>
+
       <div class="card grid-full">
-        <div class="card-title">🎯 Console de Comando <span class="sub">Delegue missões aos agentes de IA</span></div>
-        <div class="console-area">
-          <input type="text" class="console-input" id="cmdInput" placeholder='Ex: "pesquisar tendências de mercado e executar análise..."' autofocus>
-          <button class="btn" id="sendBtn">🚀 Executar</button>
+        <div class="card-title">📡 Logs</div>
+        <div class="log-container" id="dashLogs"><div class="log-entry"><span class="log-debug">Conectando...</span></div></div>
+      </div>
+    </div>
+
+    <!-- TAB: CRM -->
+    <div class="tab" id="tab-crm">
+      <div class="grid">
+        <div class="card grid-full">
+          <div class="card-title">💼 Pipeline de Vendas <span class="sub" id="crmLeadCount">0 leads</span></div>
+          <div class="pipeline" id="pipelineContainer"></div>
+        </div>
+      </div>
+      <div class="grid-3 grid">
+        <div class="card">
+          <div class="card-title">📊 Conversão</div>
+          <div class="chart-container"><canvas id="convChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🏆 Lead Scoring</div>
+          <div id="topLeads" style="font-size:11px;color:#888">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-title">📬 Follow-ups</div>
+          <div id="followUpStatus" style="font-size:11px;color:#888">Motor ativo 24/7</div>
         </div>
       </div>
     </div>
 
-    <!-- Agentes + Gráfico -->
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">🤖 Agentes</div>
-        <div class="agents-grid" id="agentsGrid"></div>
+    <!-- TAB: OAUTH2 -->
+    <div class="tab" id="tab-oauth2">
+      <div class="card grid-full">
+        <div class="card-title">🔐 Central OAuth2 <span class="sub">Conecte suas redes sociais</span></div>
+        <div class="social-grid" id="socialGrid"></div>
       </div>
-      <div class="card">
-        <div class="card-title">📊 Eficiência</div>
-        <div class="chart-container"><canvas id="efficiencyChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Raciocínio + Missões -->
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">🧠 Raciocínio</div>
-        <div class="reasoning-box" id="reasoningBox">Aguardando missão...</div>
-      </div>
-      <div class="card">
-        <div class="card-title">📋 Missões</div>
-        <div class="missions-list" id="missionsList"><div style="color:#555;font-size:11px">Nenhuma missão</div></div>
-      </div>
-    </div>
-
-    <!-- Tenants -->
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">👥 Tenants Ativos</div>
-        <div class="tenants-grid" id="tenantsGrid"><div style="color:#555;font-size:11px">Nenhum tenant</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">💳 Status Financeiro</div>
-        <div style="font-size:12px;color:#888" id="financeStatus">
-          <div style="margin-bottom:10px">Plano: <strong style="color:#c0c0d0">R$ 350,00/mês</strong></div>
-          <div style="margin-bottom:10px">Gateway: <strong style="color:#00aeef">Mercado Pago</strong></div>
-          <div style="margin-bottom:6px">Pagamentos: <strong id="finance-payments" style="color:#c0c0d0">0</strong></div>
-          <button class="btn btn-mp" id="btnShowCheckout2" style="margin-top:8px;font-size:12px;padding:8px 16px">💰 Assinar Agora</button>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">📡 Webhooks Ativos</div>
+          <div id="webhookStatus" style="font-size:11px;color:#888">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔧 Configuração</div>
+          <div style="font-size:11px;color:#888">
+            <p style="margin-bottom:8px">Configure as credenciais OAuth2 via variáveis de ambiente:</p>
+            <code style="display:block;background:#050508;padding:8px;border-radius:6px;font-size:10px;margin-bottom:6px;color:#a0a0b0">WHATSAPP_CLIENT_ID=...<br>INSTAGRAM_CLIENT_ID=...<br>FACEBOOK_CLIENT_ID=...<br>TIKTOK_CLIENT_KEY=...<br>LINKEDIN_CLIENT_ID=...<br>TELEGRAM_BOT_TOKEN=...<br>X_CLIENT_ID=...</code>
+            <p style="margin-top:8px;color:#666">Após configurar, recarregue a página para ver os botões de login.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Logs -->
-    <div class="card grid-full">
-      <div class="card-title">📡 Logs de Decisão — Tempo Real</div>
-      <div class="log-container" id="logContainer">
-        <div class="log-entry"><span class="log-debug">Aguardando conexão...</span></div>
+    <!-- TAB: LOGS -->
+    <div class="tab" id="tab-logs">
+      <div class="card grid-full">
+        <div class="card-title">📡 Feeds de Decisão dos Agentes <span class="sub">Ações executadas 24/7 em tempo real</span></div>
+        <div class="log-container" id="agentLogs" style="height:500px">
+          <div class="log-entry"><span class="log-debug">Inicializando stream de logs dos agentes...</span></div>
+        </div>
       </div>
+      <div class="grid grid-4" id="agentFilterBar" style="margin-top:8px"></div>
     </div>
   </div>
 
-  <!-- Modal Checkout -->
-  <div class="modal-overlay" id="checkoutModal">
-    <div class="modal">
-      <button class="modal-close" id="closeModal">&times;</button>
-      <h2>🚀 Athena IA</h2>
-      <p>Assine agora e tenha acesso à hiperautomação multi-agentes 24/7.</p>
-      <div class="price">R$ 350</div>
-      <div class="price-label">/ mês · Cancele quando quiser</div>
-      <ul class="features">
-        <li>5 agentes de IA especializados</li>
-        <li>Orquestração com Reasoning Loop</li>
-        <li>Processamento 24 horas por dia</li>
-        <li>Painel de controle premium</li>
-        <li>Integração com PostgreSQL</li>
-        <li>Suporte prioritário</li>
-      </ul>
-      <input type="email" id="checkoutEmail" placeholder="Seu melhor e-mail" value="">
-      <input type="text" id="checkoutName" placeholder="Seu nome">
-      <button class="btn btn-mp" id="checkoutBtn">💳 Pagar com Mercado Pago</button>
-      <div id="checkoutStatus" style="font-size:11px;color:#888;margin-top:10px;text-align:center"></div>
+  <!-- Lead Detail Modal -->
+  <div class="lead-detail" id="leadModal">
+    <div class="lead-detail-box">
+      <button class="close" id="leadModalClose">&times;</button>
+      <h3 id="ld-name">Lead</h3>
+      <div style="font-size:11px;color:#888;margin-bottom:12px" id="ld-meta"></div>
+      <div style="margin-bottom:8px"><span id="ld-score" class="lead-score"></span></div>
+      <div class="card-title" style="margin-top:12px">📝 Interações</div>
+      <div id="ld-interactions" style="max-height:150px;overflow-y:auto"></div>
+      <div class="card-title" style="margin-top:8px">📬 Follow-ups</div>
+      <div id="ld-followups" style="max-height:120px;overflow-y:auto"></div>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm" id="ld-followup-btn">📬 Agendar Follow-up</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const $ = s => document.querySelector(s);
-    let efficiencyChart = null;
-    const agentColors = { orchestrator:'#7c3aed', researcher:'#3b82f6', executor:'#f59e0b', monitor:'#10b981', logger:'#ec4899' };
+    const $=s=>document.querySelector(s); const $$=s=>document.querySelectorAll(s);
+    let effChart=null, convChart=null, currentLeadId=null;
 
-    function initChart() {
-      const ctx = document.getElementById('efficiencyChart').getContext('2d');
-      efficiencyChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: [], datasets: [{ label:'Eficiência (%)', data: [], backgroundColor: [], borderRadius: 4, borderSkipped: false }] },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { min: 80, max: 100, grid: { color:'#1a1a2a' }, ticks: { color:'#666', font:{size:9} } },
-            x: { grid: { display: false }, ticks: { color:'#888', font:{size:9} } }
-          }
-        }
+    // Navigation
+    $$('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.nav-btn').forEach(b=>b.classList.remove('active'));
+        $$('.tab').forEach(t=>t.classList.remove('active'));
+        btn.classList.add('active');
+        $(`#tab-${btn.dataset.tab}`).classList.add('active');
       });
-    }
-
-    function renderAgents(agents) {
-      const grid = document.getElementById('agentsGrid');
-      grid.innerHTML = agents.map(a => `
-        <div class="agent-card">
-          <div class="agent-name">${a.name}</div>
-          <div class="agent-spec">${a.specialty}</div>
-          <div class="agent-status">
-            <span class="agent-status-label ${a.status==='busy'?'busy':''}">${a.status==='busy'?'⚡ Ocupado':'💤 Ocioso'}</span>
-            <span class="agent-eff">${a.efficiency}%</span>
-          </div>
-          <div class="agent-tasks">${a.tasksCompleted} tarefas</div>
-        </div>
-      `).join('');
-
-      if (efficiencyChart) {
-        efficiencyChart.data.labels = agents.map(a => a.name.split(' ')[1] || a.name);
-        efficiencyChart.data.datasets[0].data = agents.map(a => a.efficiency);
-        efficiencyChart.data.datasets[0].backgroundColor = agents.map(a => agentColors[a.id] || '#7c3aed');
-        efficiencyChart.update();
-      }
-    }
-
-    function addLog(entry) {
-      const c = document.getElementById('logContainer');
-      const time = new Date().toLocaleTimeString();
-      const lvl = entry.level || 'info';
-      const d = document.createElement('div');
-      d.className = 'log-entry';
-      d.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${lvl}">${entry.agent?'['+entry.agent+'] ':''}${entry.message||''}</span>`;
-      c.appendChild(d);
-      c.scrollTop = c.scrollHeight;
-    }
-
-    function updateMissions(m) {
-      const list = document.getElementById('missionsList');
-      const first = list.querySelector('.mission-item');
-      const d = document.createElement('div');
-      d.className = 'mission-item';
-      d.innerHTML = `<span class="mission-cmd">#${m.id} ${m.command}</span><span class="mission-status ${m.status}">${m.status==='processing'?'⚡ Processando':'✅ Concluída'}</span>`;
-      if (first) list.insertBefore(d, first);
-      else list.prepend(d);
-      list.scrollTop = 0;
-    }
-
-    function updateReasoning(data) {
-      if (!data.steps) return;
-      $('#reasoningBox').innerHTML =
-        `<div style="color:#7c3aed;margin-bottom:6px;font-weight:600">🧠 Plano — Missão #${data.missionId}</div>` +
-        data.steps.map((s,i) => `<div>📌 Passo ${i+1}: Agente ${s.agent} → ${s.description}</div>`).join('');
-    }
-
-    function updateStats(stats) {
-      for (const [k,v] of Object.entries({
-        'stat-agents':stats.agents,'stat-active':stats.active,'stat-missions':stats.totalMissions,
-        'stat-tasks':stats.totalTasks,'stat-uptime':stats.uptimeDisplay||stats.uptime+'s',
-        'stat-db':stats.dbConnected?'DB':'MEM','stat-cycle':stats.engineCycle||0
-      })) document.getElementById(k).textContent = v ?? '-';
-
-      document.getElementById('m-tasks').textContent = stats.totalTasks||0;
-      document.getElementById('m-active').textContent = stats.active||0;
-      document.getElementById('m-uptime').textContent = stats.uptimeDisplay||'0s';
-      document.getElementById('m-tenants').textContent = stats.tenants||0;
-    }
-
-    async function sendMission() {
-      const input = $('#cmdInput');
-      const btn = $('#sendBtn');
-      const cmd = input.value.trim();
-      if (!cmd) return;
-      btn.disabled = true; btn.textContent = '⏳...';
-      try {
-        const r = await fetch('/api/mission', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ command: cmd })
-        });
-        addLog({ agent:'system', level:'info', message: `🚀 Missão enviada: "${cmd}"` });
-        input.value = '';
-      } catch(e) { addLog({ agent:'system', level:'error', message: `Erro: ${e.message}` }); }
-      finally { btn.disabled = false; btn.textContent = '🚀 Executar'; }
-    }
-
-    async function loadMissions() {
-      try {
-        const r = await fetch('/api/missions');
-        const missions = await r.json();
-        if (missions.length) {
-          const list = document.getElementById('missionsList');
-          list.innerHTML = missions.slice(0,10).map(m =>
-            `<div class="mission-item"><span class="mission-cmd">#${m.id} ${m.command}</span><span class="mission-status ${m.status}">${m.status==='processing'?'⚡ Processando':'✅ Concluída'}</span></div>`
-          ).join('');
-        }
-      } catch(e) {}
-    }
-
-    async function loadTenants() {
-      try {
-        const r = await fetch('/api/tenants');
-        const tenants = await r.json();
-        const grid = document.getElementById('tenantsGrid');
-        if (tenants.length) {
-          grid.innerHTML = tenants.slice(0,10).map(t =>
-            `<div class="tenant-item"><span>${t.email||t.uuid?.slice(0,8)}</span><span class="tenant-status ${t.status}">${t.status==='active'?'✅ Ativo':'⏳ Pendente'}</span></div>`
-          ).join('');
-        }
-      } catch(e) {}
-    }
-
-    async function loadStatus() {
-      try {
-        const r = await fetch('/api/status');
-        const s = await r.json();
-        updateStats(s);
-      } catch(e) {}
-    }
-
-    // Checkout
-    function openCheckout() { $('#checkoutModal').classList.add('active'); }
-    function closeCheckout() { $('#checkoutModal').classList.remove('active'); }
-
-    document.getElementById('btnShowCheckout').addEventListener('click', openCheckout);
-    document.getElementById('btnShowCheckout2').addEventListener('click', openCheckout);
-    document.getElementById('closeModal').addEventListener('click', closeCheckout);
-    $('#checkoutModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCheckout(); });
-
-    document.getElementById('checkoutBtn').addEventListener('click', async () => {
-      const email = $('#checkoutEmail').value.trim();
-      const name = $('#checkoutName').value.trim();
-      if (!email) { $('#checkoutStatus').textContent = '⚠️ Informe seu e-mail'; return; }
-      const btn = $('#checkoutBtn');
-      btn.disabled = true; btn.textContent = '⏳ Criando pagamento...';
-      $('#checkoutStatus').textContent = '';
-      try {
-        const r = await fetch('/api/checkout', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ email, name })
-        });
-        const data = await r.json();
-        if (data.initPoint) {
-          addLog({ agent:'checkout', level:'success', message: `🛒 Checkout criado para ${email}` });
-          window.open(data.initPoint, '_blank');
-          $('#checkoutStatus').innerHTML = '✅ Pagamento criado! Abrindo Mercado Pago...<br><small style="color:#666">Após pagar, aguarde a confirmação automática.</small>';
-        } else {
-          $('#checkoutStatus').textContent = '❌ Erro: ' + (data.error || 'Resposta inválida');
-        }
-      } catch(e) {
-        $('#checkoutStatus').textContent = '❌ Erro: ' + e.message;
-      }
-      btn.disabled = false; btn.textContent = '💳 Pagar com Mercado Pago';
     });
 
+    // Chart Init
+    const agentColors={orchestrator:'#7c3aed',marketing:'#ec4899',financial:'#f59e0b',accounting:'#10b981',legal:'#3b82f6',logistics:'#8b5cf6',hr:'#06b6d4',helpdesk:'#f43f5e',project:'#14b8a6'};
+
+    function initCharts(){
+      const ctx1=document.getElementById('effChart')?.getContext('2d');
+      if(ctx1) effChart=new Chart(ctx1,{
+        type:'bar',data:{labels:[],datasets:[{label:'%',data:[],backgroundColor:[],borderRadius:4,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:80,max:100,grid:{color:'#1a1a2a'},ticks:{color:'#666',font:{size:8}}},x:{grid:{display:false},ticks:{color:'#888',font:{size:8}}}}}
+      });
+      const ctx2=document.getElementById('convChart')?.getContext('2d');
+      if(ctx2) convChart=new Chart(ctx2,{
+        type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:9},padding:8}}}}
+      });
+    }
+
+    // Add log
+    function addLog(containerId, entry){
+      const c=document.getElementById(containerId)||$('#dashLogs');
+      if(!c) return;
+      const t=new Date().toLocaleTimeString(), lvl=entry.level||'info';
+      const d=document.createElement('div'); d.className='log-entry';
+      d.innerHTML=`<span class="log-time">[${t}]</span> <span class="log-${lvl}">${entry.agent?'['+entry.agent+'] ':''}${entry.message||''}</span>`;
+      c.appendChild(d); c.scrollTop=c.scrollHeight;
+    }
+
+    function addGlobalLog(entry){
+      addLog('dashLogs', entry);
+      addLog('agentLogs', entry);
+    }
+
+    // Render agents
+    function renderAgents(agents){
+      const grid=document.getElementById('agentsGrid');
+      if(!grid)return;
+      grid.innerHTML=agents.map(a=>
+        `<div class="agent-card" style="border-left:3px solid ${agentColors[a.id]||'#7c3aed'}">
+          <div class="agent-name">${a.icon||'🤖'} ${a.name}</div>
+          <div class="agent-spec">${a.specialty||''}</div>
+          <div class="agent-s">
+            <span class="agent-sl ${a.tasksCompleted>0&&a.status!=='idle'?'busy':''}">${a.tasksCompleted>0&&a.status!=='idle'?'⚡ Ativo':'💤 Ocioso'}</span>
+            <span class="agent-eff">${Math.round(a.efficiency||0)}%</span>
+          </div>
+          <div class="agent-tasks">${a.tasksCompleted||0} tarefas</div>
+        </div>`
+      ).join('');
+      if(effChart){
+        effChart.data.labels=agents.map(a=>a.name?.split(' ').pop()||a.id);
+        effChart.data.datasets[0].data=agents.map(a=>Math.round(a.efficiency||0));
+        effChart.data.datasets[0].backgroundColor=agents.map(a=>agentColors[a.id]||'#7c3aed');
+        effChart.update();
+      }
+    }
+
     // SSE
-    let sseConnected = false;
-    function connectSSE() {
-      const es = new EventSource('/api/stream');
-      es.addEventListener('connected', () => {
-        sseConnected = true;
-        addLog({ agent:'system', level:'success', message: '🔗 Conectado ao motor 24/7' });
+    function connectSSE(){
+      const es=new EventSource('/api/stream');
+      es.addEventListener('connected',()=>{ addGlobalLog({agent:'system',level:'success',message:'🔗 Conectado ao motor 24/7'}); });
+      es.addEventListener('log',e=>{try{addGlobalLog(JSON.parse(e.data))}catch{}});
+      es.addEventListener('agent-update',e=>{try{renderAgents(JSON.parse(e.data));loadStatus()}catch{}});
+      es.addEventListener('reasoning',e=>{
+        try{
+          const d=JSON.parse(e.data);
+          const box=$('#reasoningBox');
+          if(box&&d.steps) box.innerHTML='<div style="color:#7c3aed;margin-bottom:4px;font-weight:600">🧠 Plano de Raciocínio</div>'+d.steps.map((s,i)=>`<div>📌 ${s.agent} → ${s.description?.slice(0,60)}</div>`).join('');
+        }catch{}
       });
-      es.addEventListener('log', e => { try { addLog(JSON.parse(e.data)); } catch(ex) {} });
-      es.addEventListener('agent-update', e => { try { renderAgents(JSON.parse(e.data)); loadStatus(); } catch(ex) {} });
-      es.addEventListener('reasoning', e => { try { updateReasoning(JSON.parse(e.data)); } catch(ex) {} });
-      es.addEventListener('mission-start', e => { try { updateMissions(JSON.parse(e.data)); } catch(ex) {} });
-      es.addEventListener('mission-done', e => {
-        try { addLog({ agent:'system', level:'success', message: '🏁 Missão concluída!' }); loadMissions(); loadStatus(); } catch(ex) {}
+      es.addEventListener('mission-start',e=>{try{const d=JSON.parse(e.data);updateMissionList(d)}catch{}});
+      es.addEventListener('mission-done',e=>{try{addGlobalLog({agent:'system',level:'success',message:'🏁 Missão concluída!'});loadMissions();loadStatus()}catch{}});
+      es.addEventListener('crm-update',e=>{try{loadCRM();loadStatus()}catch{}});
+      es.addEventListener('heartbeat',e=>{
+        try{
+          const d=JSON.parse(e.data);
+          const el=document.getElementById('st-cycle');
+          if(el&&d.cycle) el.textContent=d.cycle;
+        }catch{}
       });
-      es.addEventListener('task-start', e => { try { const d=JSON.parse(e.data); addLog({ agent:'system', level:'info', message: `📋 Tarefa: ${d.task.description}` }); } catch(ex) {} });
-      es.addEventListener('tenant-update', e => { loadTenants(); loadStatus(); });
-      es.addEventListener('heartbeat', e => {
-        try {
-          const d = JSON.parse(e.data);
-          document.getElementById('stat-cycle').textContent = d.cycle || '-';
-        } catch(ex) {}
-      });
-      es.addEventListener('error', e => { try { addLog(JSON.parse(e.data)); } catch(ex) {} });
-      es.onerror = () => {
-        if (sseConnected) { addLog({ agent:'system', level:'warn', message: '⚠️ Conexão perdida. Reconectando...' }); sseConnected = false; }
-        setTimeout(connectSSE, 3000);
-      };
+      es.onerror=()=>{setTimeout(connectSSE,3000)};
     }
 
-    // Eventos
-    $('#sendBtn').addEventListener('click', sendMission);
-    $('#cmdInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMission(); });
-
-    // Checkout via URL param
-    const params = new URLSearchParams(location.search);
-    if (params.get('checkout') === 'success') {
-      addLog({ agent:'checkout', level:'success', message: '✅ Pagamento confirmado! Tenant ativado.' });
-      setTimeout(() => loadTenants(), 2000);
+    // Load status
+    async function loadStatus(){
+      try{
+        const r=await fetch('/api/status'); const s=await r.json();
+        for(const[k,v]of Object.entries({stAgents:s.agents,stActive:s.active,stMissions:s.totalMissions,stCycle:s.engineCycle,stUptime:s.uptimeDisplay||s.uptime+'s',stDb:s.dbConnected?'DB':'MEM'}))
+          {const el=document.getElementById(k);if(el)el.textContent=v??'-';}
+        for(const[k,v]of Object.entries({mTasks:s.totalTasks,mActive:s.active,mMissions:s.totalMissions,mUptime:s.uptimeDisplay||'0s'}))
+          {const el=document.getElementById(k);if(el)el.textContent=v??'0';}
+      }catch{}
     }
 
-    // Init
-    initChart();
+    // Load missions
+    async function loadMissions(){
+      try{
+        const r=await fetch('/api/missions?limit=10'); const ms=await r.json();
+        if(!ms.length) return;
+        const list=document.getElementById('missionsList'); if(!list) return;
+        list.innerHTML=ms.map(m=>
+          `<div class="mission-item"><span class="mission-cmd">#${m.id} ${m.command?.slice(0,60)}</span><span class="mission-st ${m.status}">${m.status==='processing'?'⚡':'✅'}</span></div>`
+        ).join('');
+      }catch{}
+    }
+
+    function updateMissionList(m){
+      const list=document.getElementById('missionsList');
+      if(!list)return;
+      const first=list.querySelector('.mission-item');
+      const d=document.createElement('div'); d.className='mission-item';
+      d.innerHTML=`<span class="mission-cmd">#${m.id} ${(m.command||'').slice(0,60)}</span><span class="mission-st processing">⚡</span>`;
+      if(first)list.insertBefore(d,first); else list.prepend(d);
+    }
+
+    // Send mission
+    async function sendMission(){
+      const inp=$('#cmdInput'), btn=$('#sendBtn'), cmd=inp.value.trim();
+      if(!cmd)return;
+      btn.disabled=true; btn.textContent='⏳';
+      try{
+        await fetch('/api/mission',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})});
+        addGlobalLog({agent:'console',level:'info',message:`🚀 Missão: "${cmd}"`});
+        inp.value='';
+      }catch(e){addGlobalLog({agent:'system',level:'error',message:`❌ ${e.message}`})}
+      btn.disabled=false; btn.textContent='🚀 Executar';
+    }
+
+    // ===== CRM =====
+    async function loadCRM(){
+      try{
+        const r=await fetch('/api/crm/pipeline'); const data=await r.json();
+        const stages=data.stages||[], stats=data.stats||[];
+        const container=document.getElementById('pipelineContainer'); if(!container)return;
+        container.innerHTML='';
+
+        for(const s of stages){
+          const col=document.createElement('div'); col.className='pipeline-col';
+          const stat=stats.find(st=>st.id===s.id)||{count:0,avgScore:0};
+          col.innerHTML=
+            `<div class="pipeline-h" style="color:${s.color}"><span>${s.icon} ${s.label}</span><span class="count">${stat.count} | ${stat.avgScore}pts</span></div>`;
+          container.appendChild(col);
+
+          // Load leads for this stage
+          try{
+            const lr=await fetch(`/api/crm/leads?stage=${s.id}`); const leads=await lr.json();
+            if(leads.length){
+              leads.slice(0,8).forEach(l=>{
+                const card=document.createElement('div'); card.className='lead-card';
+                card.innerHTML=
+                  `<div class="lead-name">${l.name||'Sem nome'}</div>
+                  <div class="lead-source">${l.source||''}${l.email?' · '+l.email.slice(0,20):''}</div>
+                  <span class="lead-score ${(l.score||0)>=70?'high':''}">🎯 ${l.score||0}</span>`;
+                card.addEventListener('click',()=>openLeadDetail(l.id));
+                col.appendChild(card);
+              });
+            } else {
+              const empty=document.createElement('div'); empty.style.cssText='color:#555;font-size:10px;padding:8px';
+              empty.textContent='Nenhum lead'; col.appendChild(empty);
+            }
+          }catch{}
+        }
+
+        // Lead count
+        const totalLeads=stats.reduce((s,st)=>s+st.count,0);
+        const lc=document.getElementById('crmLeadCount'); if(lc) lc.textContent=`${totalLeads} leads`;
+
+        // Conversion chart
+        if(convChart){
+          convChart.data.labels=stats.filter(s=>s.count>0).map(s=>s.label);
+          convChart.data.datasets[0].data=stats.filter(s=>s.count>0).map(s=>s.count);
+          convChart.data.datasets[0].backgroundColor=stats.filter(s=>s.count>0).map(s=>s.color);
+          convChart.update();
+        }
+
+        // Top leads
+        const tl=document.getElementById('topLeads');
+        if(tl){
+          const allR=await fetch('/api/crm/leads'); const all=await allR.json();
+          const top=(all||[]).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
+          tl.innerHTML=top.length?top.map(l=>`<div style="padding:4px 0;border-bottom:1px solid #0d0d18"><strong>${l.name||'?'}</strong> 🎯 ${l.score||0} · ${l.stage||'lead'}</div>`).join(''):'Nenhum lead cadastrado';
+        }
+      }catch(e){console.error('CRM load error:',e)}
+    }
+
+    // Lead detail
+    async function openLeadDetail(id){
+      currentLeadId=id;
+      try{
+        const r=await fetch(`/api/crm/leads/${id}`); const l=await r.json();
+        if(!l)return;
+        document.getElementById('ld-name').textContent=`${l.name||'Lead'} (${l.email||'sem email'})`;
+        document.getElementById('ld-meta').textContent=`Origem: ${l.source||'-'} · ${l.interactionCount||0} interações · ${l.stage||'lead'}`;
+        const scoreEl=document.getElementById('ld-score');
+        scoreEl.textContent=`🎯 ${l.score||0} pontos`;
+        scoreEl.className=`lead-score ${(l.score||0)>=70?'high':''}`;
+
+        // Interactions
+        const ic=document.getElementById('ld-interactions');
+        if(l.interactions?.length){
+          ic.innerHTML=l.interactions.slice(0,10).map(i=>
+            `<div class="interaction-item">[${new Date(i.created_at).toLocaleString('pt-BR')}] ${i.channel||i.type} ${i.direction==='outbound'?'→':'←'}: ${(i.content||'').slice(0,100)}</div>`
+          ).join('');
+        } else ic.innerHTML='<div style="color:#666">Nenhuma interação</div>';
+
+        // Follow-ups
+        const fc=document.getElementById('ld-followups');
+        if(l.followUps?.length){
+          fc.innerHTML=l.followUps.slice(0,5).map(f=>
+            `<div class="followup-item">${f.status==='sent'?'✅':'⏳'} ${(f.message||'').slice(0,80)}...</div>`
+          ).join('');
+        } else fc.innerHTML='<div style="color:#666">Nenhum follow-up</div>';
+
+        $('#leadModal').classList.add('active');
+      }catch(e){console.error(e)}
+    }
+
+    document.getElementById('leadModalClose').addEventListener('click',()=>$('#leadModal').classList.remove('active'));
+    $('#leadModal').addEventListener('click',e=>{if(e.target===e.currentTarget)$('#leadModal').classList.remove('active')});
+    document.getElementById('ld-followup-btn')?.addEventListener('click',async()=>{
+      if(!currentLeadId)return;
+      try{
+        await fetch(`/api/crm/leads/${currentLeadId}/followup`,{method:'POST'});
+        addGlobalLog({agent:'crm',level:'success',message:`📬 Follow-up agendado para lead #${currentLeadId}`});
+        openLeadDetail(currentLeadId);
+      }catch(e){addGlobalLog({agent:'crm',level:'error',message:`❌ ${e.message}`})}
+    });
+
+    // ===== OAuth2 =====
+    async function loadOAuth(){
+      try{
+        const r=await fetch('/api/oauth/status'); const data=await r.json();
+        const conns=data.connections||[];
+        const grid=document.getElementById('socialGrid'); if(!grid) return;
+        grid.innerHTML=conns.map(c=>
+          `<div class="social-card">
+            <div class="social-icon">${c.icon||'🔌'}</div>
+            <div class="social-name">${c.name||c.id}</div>
+            <div><span class="social-status ${c.connected?'connected':'disconnected'}">${c.connected?'✅ Conectado':'❌ Desconectado'}</span></div>
+            ${c.connected
+              ? `<button class="btn btn-sm social-btn" onclick="disconnectOAuth('${c.id}')">Desconectar</button>`
+              : `<button class="btn btn-sm social-btn" onclick="connectOAuth('${c.id}')">${c.configured?'🔗 Conectar':'⚙️ Configurar'}</button>`
+            }
+          </div>`
+        ).join('');
+
+        // Webhook status
+        try{
+          const wr=await fetch('/api/webhooks/status'); const wd=await wr.json();
+          const ws=document.getElementById('webhookStatus');
+          if(ws&&wd.platforms) ws.innerHTML=wd.platforms.map(p=>
+            `<div style="padding:4px 0;border-bottom:1px solid #0d0d18;font-size:11px">${p.icon||'🔗'} <strong>${p.name}</strong> <code style="float:right;color:#555;font-size:9px">${p.webhookUrl}</code></div>`
+          ).join('');
+        }catch{}
+      }catch(e){console.error(e)}
+    }
+
+    window.connectOAuth=function(platform){
+      window.open(`/api/oauth/${platform}/login`,'_blank');
+      addGlobalLog({agent:'oauth2',level:'info',message:`🔐 Redirecionando para login ${platform}...`});
+    };
+    window.disconnectOAuth=async function(platform){
+      await fetch(`/api/oauth/${platform}/disconnect`,{method:'POST'});
+      addGlobalLog({agent:'oauth2',level:'info',message:`🔌 ${platform} desconectado`});
+      loadOAuth();
+    };
+
+    // ===== Agent Filter Bar =====
+    async function loadAgentFilter(){
+      try{
+        const r=await fetch('/api/agents'); const agents=await r.json();
+        const bar=document.getElementById('agentFilterBar'); if(!bar)return;
+        bar.innerHTML=agents.map(a=>
+          `<div class="card" style="padding:8px;text-align:center;cursor:pointer" onclick="addGlobalLog({agent:'${a.id||'agent'}',level:'info',message:'📊 ${a.name||a.id}: ${a.tasksCompleted||0} tarefas completadas | Eficiência: ${Math.round(a.efficiency||0)}%'})">
+            <div style="font-size:16px">${a.icon||'🤖'}</div>
+            <div style="font-size:9px;font-weight:600;margin-top:2px">${a.name||a.id}</div>
+            <div style="font-size:8px;color:#888">${a.tasksCompleted||0} tasks</div>
+          </div>`
+        ).join('');
+      }catch{}
+    }
+
+    // ===== Events =====
+    $('#sendBtn').addEventListener('click',sendMission);
+    $('#cmdInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMission()});
+
+    // ===== Init =====
+    initCharts();
     loadStatus();
     loadMissions();
-    loadTenants();
+    loadCRM();
+    loadOAuth();
+    loadAgentFilter();
     connectSSE();
-    setInterval(loadStatus, 5000);
-    setInterval(loadTenants, 15000);
+
+    setInterval(loadStatus,5000);
+    setInterval(loadMissions,15000);
+    setInterval(loadCRM,20000);
   </script>
 </body>
 </html>
