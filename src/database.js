@@ -37,6 +37,7 @@ export async function initDB() {
     retries = 0;
     console.log('[DB] PostgreSQL conectado');
     await createSchema();
+    await seedAgentesEAdmin();
     notify();
   } catch (e) {
     console.warn('[DB] Falha na conexão:', e.message);
@@ -96,6 +97,11 @@ async function createSchema() {
       retries INT DEFAULT 0, result TEXT,
       created_at TIMESTAMP DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS agentes (
+      id SERIAL PRIMARY KEY, name VARCHAR(255),
+      sector VARCHAR(50), status VARCHAR(20) DEFAULT 'IDLE',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
     CREATE TABLE IF NOT EXISTS missions (
       id SERIAL PRIMARY KEY, command TEXT NOT NULL,
       status VARCHAR(20) DEFAULT 'pending',
@@ -119,7 +125,40 @@ async function createSchema() {
       message TEXT, created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+  try {
+    await pool.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS company_name VARCHAR(255)`);
+    await pool.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user'`);
+  } catch (e) { /* column may already exist */ }
   console.log('[DB] Schema verificado — RPA incluído');
+}
+
+export async function seedAgentesEAdmin() {
+  if (!dbOk || !pool) return;
+  try {
+    await pool.query(`
+      INSERT INTO tenants (company_name, email, status, role)
+      VALUES ($1, $2, 'active', 'admin'), ($3, $4, 'active', 'admin')
+      ON CONFLICT (email) DO UPDATE SET status = 'active', role = 'admin';
+    `, ['Master Netizen', 'vpquintino@gmail.com', 'Armarinho da Jack', 'armarinhodajack@gmail.com']);
+    const res = await pool.query("SELECT COUNT(*) AS cnt FROM agentes;");
+    if (parseInt(res.rows[0].cnt) === 0) {
+      console.log('[DB] Semeando os 8 Robôs Setoriais...');
+      await pool.query(`
+        INSERT INTO agentes (name, sector, status) VALUES
+        ('Robô de Marketing', 'marketing', 'RUNNING'),
+        ('Robô de CRM', 'crm', 'RUNNING'),
+        ('Robô Financeiro', 'financeiro', 'RUNNING'),
+        ('Robô de Contabilidade', 'contabilidade', 'RUNNING'),
+        ('Robô Jurídico', 'juridico', 'RUNNING'),
+        ('Robô de Logística', 'logistica', 'RUNNING'),
+        ('Robô de RH', 'rh', 'RUNNING'),
+        ('Robô de Helpdesk', 'helpdesk', 'RUNNING');
+      `);
+      console.log('[DB] Robôs semeados com sucesso!');
+    }
+  } catch (err) {
+    console.error('[DB] Erro no seed:', err.message);
+  }
 }
 
 export async function query(text, params) {
