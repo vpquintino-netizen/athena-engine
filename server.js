@@ -22,6 +22,8 @@ import { mountOAuthRoutes } from './src/oauth2.js';
 import { configureAI } from './src/ai.js';
 import { mountAuthRoutes, authMiddleware, optionalAuth, masterOnly, subscriptionRequired, tenantIsolation, ensureAuthSchema, verifyToken } from './src/auth.js';
 import { mountBrandingRoutes } from './src/branding.js';
+import { startRPAEngine, ensureRPASchema, getRPAStats } from './src/rpa_orchestrator.js';
+import { mountRPARoutes, scheduleAutomatedTasks } from './src/agents_rpa.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -49,6 +51,7 @@ app.get('/api/status', (req, res) => {
     engineCycle: getCycle(), mode: isDBReady() ? 'production' : 'development',
     version: '2.1.0', startedAt: new Date(STARTED_AT).toISOString(),
     authRequired: !req.user, authenticated: !!req.user,
+    rpaActive: true, rpaRobots: 8,
     user: req.user ? { email: req.user.email, role: req.user.role, tenant_uuid: req.user.tenant_uuid } : null,
   });
 });
@@ -157,6 +160,7 @@ mountAuthRoutes(app);
 mountSocialRoutes(app);
 mountOAuthRoutes(app);
 mountBrandingRoutes(app);
+mountRPARoutes(app);
 
 // ===== Checkout protegido =====
 app.post('/api/checkout', async (req, res) => {
@@ -196,6 +200,9 @@ async function start() {
 
   startEngine();
   startFollowUpEngine();
+  await ensureRPASchema();
+  startRPAEngine();
+  scheduleAutomatedTasks().catch(() => {});
 
   httpServer.listen(PORT, () => {
     console.log(`  🌐 http://localhost:${PORT}`);
@@ -206,6 +213,7 @@ async function start() {
     console.log(`  📦 SaaS: R$ 350/mês`);
     console.log(`  🆓 Freemium: ✓`);
     console.log(`  🎨 White-Label: ✓`);
+    console.log(`  🤖 RPA Orchestrator: 8 Digital Workers`);
     console.log(`  ⚙️  Engine 24/7: ✓\n`);
   });
 }

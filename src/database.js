@@ -102,8 +102,24 @@ async function createSchema() {
       reasoning TEXT, result TEXT, source VARCHAR(50),
       created_at TIMESTAMP DEFAULT NOW(), completed_at TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS rpa_queue (
+      id SERIAL PRIMARY KEY, robot_id VARCHAR(50),
+      type VARCHAR(100), input_data JSONB,
+      status VARCHAR(20) DEFAULT 'pending',
+      priority INT DEFAULT 5,
+      retries INT DEFAULT 0, max_retries INT DEFAULT 3,
+      error_log TEXT, result_data JSONB,
+      tenant_uuid UUID,
+      created_at TIMESTAMP DEFAULT NOW(),
+      started_at TIMESTAMP, completed_at TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS rpa_logs (
+      id SERIAL PRIMARY KEY, queue_id INT,
+      robot_id VARCHAR(50), level VARCHAR(10) DEFAULT 'info',
+      message TEXT, created_at TIMESTAMP DEFAULT NOW()
+    );
   `);
-  console.log('[DB] Schema verificado');
+  console.log('[DB] Schema verificado — RPA incluído');
 }
 
 export async function query(text, params) {
